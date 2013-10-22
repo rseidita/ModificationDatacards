@@ -62,7 +62,8 @@ def ScaleDatacard (datacardname,xsecScale) :
       if systime == 0 :
         tempLine = line.split (' ')
         tempLine = filter(lambda a: a != '', tempLine)
-        print " line.split (' ')[0] = ", line.split (' ')[0], "\n"
+        #print " line.split (' ')[0] = ", line.split (' ')[0], "\n"
+        if len(tempLine) == 0 : continue #skip if empty
         if tempLine[0] == 'bin' and firstTimeBin:
           binName = line.split (' ')
           binName = filter(lambda a: a != 'bin', binName)
