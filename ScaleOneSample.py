@@ -160,7 +160,8 @@ def ScaleDatacard (datacardname,xsecScale) :
       for histoName, histogram in histograms.iteritems():
         for sample in sampleName:
           #print "histoName = ",histoName
-          match = re.search("histo_"+str(sample)+"_", histoName)
+          match = re.search("histo_"+str(sample)+"_", histoName)  # uncomment, if "for Rebeca"
+          #match = re.search("histo_"+str(sample), histoName) # for Rebeca
           match2 = bool("histo_"+str(sample) == histoName)
           if match or match2:
             additionalScale = 1.
