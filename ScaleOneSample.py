@@ -49,6 +49,7 @@ def ScaleDatacard (datacardname,xsecScale) :
     binName = []
     longListBin = [] # the bin list just before systematics
     sampleName = []
+    reducedsampleName = [] # remove duplicate!
     sampleRate = []
     observation = []
     systematics = []
@@ -130,6 +131,11 @@ def ScaleDatacard (datacardname,xsecScale) :
       numSample+=1
       newSampleRate.append(additionalScale*float(rate))
 
+    # remove duplicates in "sampleName"
+    # used in scaling histograms in case of "matching"
+    # and in case the same sample name is used in several "bin"
+    # NB: the order is not preserved, but who cares!
+    reducedsampleName = list(set(sampleName))
 
     # modify sample rate in root file!
 
@@ -158,7 +164,7 @@ def ScaleDatacard (datacardname,xsecScale) :
 
 
       for histoName, histogram in histograms.iteritems():
-        for sample in sampleName:
+        for sample in reducedsampleName:
           #print "histoName = ",histoName
           match = re.search("histo_"+str(sample)+"_", histoName)  # uncomment, if "for Rebeca"
           #match = re.search("histo_"+str(sample), histoName) # for Rebeca
