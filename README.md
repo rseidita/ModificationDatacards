@@ -25,5 +25,4 @@ and for multi-modifications:
     
 # Change the name of one sample
 
-    python ChangeName.py  -d hwwof_2j_shape_7TeV.txt  -i inputName.py
-    
+    python ChangeName.py  -d hww-19.36fb.mH125.txt    -i   inputName.py
