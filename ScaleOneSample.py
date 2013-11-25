@@ -144,7 +144,7 @@ def ScaleDatacard (datacardname,xsecScale) :
       # check if root file is present (the name must end with .root)
       matchfile = re.search(".root", rootFiles[rootFileBin])
       if not matchfile:
-       continuehwwof_2j_shape_7TeV.txt
+       continue
       rootFile = ROOT.TFile.Open(str(thepath)+"/"+str(rootFiles[rootFileBin]))
 
       # get the histograms
