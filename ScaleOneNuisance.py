@@ -174,8 +174,7 @@ def ScaleOneNuisance (datacardname,systScale) :
                 matchDo = bool("histo_"+str(sample)+"_"+systematicsName[numSample]+"Down" == histoName)
 
                 if matchUp or matchDo:
-                  additionalScale = 1.
-                  additionalScale = systScaleFactor[numSystType]
+                  additionalScale = float(systScaleFactor[systematicsName[numSystType]])
                   # what to do now?
                   # 1) get the nominal
                   # 2) sum the errors
@@ -240,16 +239,35 @@ def ScaleOneNuisance (datacardname,systScale) :
     f.write ("---------------------------------------------------------------------------------------------------- \n")
     numSystType = 0
     for systType in systematicsType:
-      if systType != "shape" or  systType != "gmN" :
+      if systType != "shape" and  systType != "gmN" :
         # shape already taken into account in the root file histogram
         # gmN cannot be scaled properly with this method!
         if systematicsName[numSystType] in systScaleFactor :
-          print "systematics : ",systematics
-          # now scale!
+          # print "systematics : ",systematics[numSystType]
+          # now scale
+          tempsystematics = systematics[numSystType].split (' ')
+          tempsystematics = filter(lambda a: a != '', tempsystematics)
+
+          f.write (tempsystematics[0])
+          f.write (" ")
+          f.write (tempsystematics[1])
+          f.write (" ")
+
+          for itSampleSyst in range(len(tempsystematics)):
+            f.write (" ")
+            if itSampleSyst >=2 and tempsystematics[itSampleSyst] != "-" :
+             additionalScale = float(systScaleFactor[systematicsName[numSystType]])
+             currentValue = float(tempsystematics[itSampleSyst])  # 1.10 or 0.90
+             currentValue = currentValue - 1.00    #0.10 or -0.10
+             currentValue = currentValue * additionalScale
+             f.write (str(currentValue+1.00))
+          f.write ("\n")
         else :
           f.write (systematics[numSystType] + '\n')
       else :
         f.write (systematics[numSystType] + '\n')
+
+      numSystType+=1
 
     f.close ()
 
