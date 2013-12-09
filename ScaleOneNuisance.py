@@ -91,7 +91,7 @@ def ScaleOneNuisance (datacardname,systScale) :
           header.append (line)
           # 0 1 2 3
           #shapes * hwwof_1j_shape_7TeV hwwof_1j.input_7TeV.root histo_$PROCESS histo_$PROCESS_$SYSTEMATIC
-        if tempLine[0] == 'shapes' :
+        if tempLine[0] == 'shapes':
             tempRootList = line.split (' ')
             tempRootList = filter(lambda a: a != '', tempRootList)
             if tempRootList[1] == '*' :
@@ -109,7 +109,7 @@ def ScaleOneNuisance (datacardname,systScale) :
     # clean empty systematics
     systematics = [elem for elem in systematics if len (elem.split ()) > 0]
     systematicsName = [elem for elem in systematicsName if len (elem.split ()) > 0]
-    systematicsType = [elem for elem in systematicsName if len (elem.split ()) > 0]
+    systematicsType = [elem for elem in systematicsType if len (elem.split ()) > 0]
 
 
     #print "header = ", header, "\n\n"
@@ -164,23 +164,31 @@ def ScaleOneNuisance (datacardname,systScale) :
         # modify nuisance systScaleFactor (check samples that are affected)
         numSystType = 0
         for systType in systematicsType:
-          if systType == "shape" : # only shape here!
+          if systType == "shape" or systType == "shapeN2" : # only shape here!
             if systematicsName[numSystType] in systScaleFactor :
               # change root file histogram
               # look for which samples are affected
               for sample in reducedsampleName:
                 #print "histoName = ",histoName
-                matchUp = bool("histo_"+str(sample)+"_"+systematicsName[numSample]+"Up"   == histoName)
-                matchDo = bool("histo_"+str(sample)+"_"+systematicsName[numSample]+"Down" == histoName)
+                matchUp = bool("histo_"+str(sample)+"_"+systematicsName[numSystType]+"Up"   == histoName)
+                matchDo = bool("histo_"+str(sample)+"_"+systematicsName[numSystType]+"Down" == histoName)
+
+                #print "histo_",str(sample),"_",systematicsName[numSystType],"Up  ==  ",histoName
 
                 if matchUp or matchDo:
+                  print ">> scaling ", systematicsName[numSystType]
                   additionalScale = float(systScaleFactor[systematicsName[numSystType]])
                   # what to do now?
                   # 1) get the nominal
+                  nominalHist = histograms["histo_"+str(sample)]
                   # 2) sum the errors
+                  diffToNominalHist = histogram
+                  histogram.Add(nominalHist,-1.) #  diff =  up - nominal
                   # 3) scale the errors
                   histogram.Sumw2()
-                  histogram.Scale(additionalScale)
+                  histogram.Scale(additionalScale)  #  diff -> diff * alpha
+                  # 4) recreate scaled up/down histogram
+                  histogram.Add(nominalHist,1.)  #  up = diff * alpha + nominal
 
           numSystType+=1
 
@@ -239,7 +247,7 @@ def ScaleOneNuisance (datacardname,systScale) :
     f.write ("---------------------------------------------------------------------------------------------------- \n")
     numSystType = 0
     for systType in systematicsType:
-      if systType != "shape" and  systType != "gmN" :
+      if systType != "shape" and systType != "shapeN2" and  systType != "gmN" :
         # shape already taken into account in the root file histogram
         # gmN cannot be scaled properly with this method!
         if systematicsName[numSystType] in systScaleFactor :
