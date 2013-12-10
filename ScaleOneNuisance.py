@@ -251,7 +251,7 @@ def ScaleOneNuisance (datacardname,systScale) :
         # shape already taken into account in the root file histogram
         # gmN cannot be scaled properly with this method!
         if systematicsName[numSystType] in systScaleFactor :
-          # print "systematics : ",systematics[numSystType]
+          print "systematics : ",systematics[numSystType]
           # now scale
           tempsystematics = systematics[numSystType].split (' ')
           tempsystematics = filter(lambda a: a != '', tempsystematics)
@@ -264,11 +264,17 @@ def ScaleOneNuisance (datacardname,systScale) :
           for itSampleSyst in range(len(tempsystematics)):
             f.write (" ")
             if itSampleSyst >=2 and tempsystematics[itSampleSyst] != "-" :
-             additionalScale = float(systScaleFactor[systematicsName[numSystType]])
-             currentValue = float(tempsystematics[itSampleSyst])  # 1.10 or 0.90
-             currentValue = currentValue - 1.00    #0.10 or -0.10
-             currentValue = currentValue * additionalScale
-             f.write (str(currentValue+1.00))
+              additionalScale = float(systScaleFactor[systematicsName[numSystType]])
+              currentValue = float(tempsystematics[itSampleSyst])  # 1.10 or 0.90
+              currentValue = currentValue - 1.00    #0.10 or -0.10
+              currentValue = currentValue * additionalScale
+              f.write(" ")
+              f.write (str(currentValue+1.00))
+              f.write(" ")
+            elif itSampleSyst >=2 :
+              f.write(" ")
+              f.write(tempsystematics[itSampleSyst])
+              f.write(" ")
           f.write ("\n")
         else :
           f.write (systematics[numSystType] + '\n')
