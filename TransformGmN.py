@@ -185,7 +185,7 @@ def TransformGmN (datacardname) :
         Ncontrol = int(tempsystematics[2])
         # Nsignal = alpha * Ncontrol
         # errNsignal/Nsignal = alpha * sqrt(Ncontrol) / alpha * Ncontrol = 1. / sqrt (Ncontrol)
-        errorNsignalRelative = 1. / sqrt(Ncontrol)
+        errorNsignalRelative = 1. / math.sqrt(Ncontrol)
 
         for itSampleSyst in range(len(tempsystematics)):
           f.write (" ")
@@ -197,7 +197,7 @@ def TransformGmN (datacardname) :
               f.write(" ")
               f.write(tempsystematics[itSampleSyst])
               f.write(" ")
-          f.write ("\n")
+        f.write ("\n")
       else :
         f.write (systematics[numSystType] + '\n')
 
