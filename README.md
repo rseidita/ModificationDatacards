@@ -32,6 +32,13 @@ and for multi-modifications:
 
     python ScaleOneNuisance.py  -d   hww-19.36fb.mH125.txt    -i   inputScaleNuisance.py
 
+# Transform gmN into lnN
+
+  transform gmN into lnN.
+  To easy perform signal injection without any bias (bug in combine?) and to remove gmN in case of "many" events in control region
+
+    python TransformGmN.py  -d   hww-19.36fb.mH125.txt
+
 e.g.
 
     python ../ScaleOneNuisance.py  -d   hwwof_0j_shape_8TeV.txt  -i   ../inputScaleNuisance.py
