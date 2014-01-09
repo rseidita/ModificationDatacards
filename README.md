@@ -3,6 +3,12 @@ ModificationDatacards
 
 Several scripts to modify datacards
 
+Example working folder:
+
+    /afs/cern.ch/user/a/amassiro/Limit/ModificationDatacards
+
+
+
 # Scale one sample by a factor
 
     python ScaleOneSample.py  -d hwwof_2j_shape_7TeV.txt    -i inputScale7TeV.py
@@ -38,6 +44,18 @@ and for multi-modifications:
   To easy perform signal injection without any bias (bug in combine?) and to remove gmN in case of "many" events in control region
 
     python TransformGmN.py  -d   hww-19.36fb.mH125.txt
+
+
+# Transform shape datacard into cut based one
+
+  transform a shape based datacard into a cut based one.
+  To be performed for:
+    * check of the gain of shape analysis, w.r.t just merging
+    * easy read a simple cut based analysis, created through the shape package
+
+    python TransformShapeToCutBased.py  -d   hww-19.36fb.mH125.txt
+
+
 
 e.g.
 
