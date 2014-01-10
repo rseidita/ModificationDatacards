@@ -5,6 +5,7 @@ Several scripts to modify datacards
 
 Example working folder:
 
+    cmsneu
     /afs/cern.ch/user/a/amassiro/Limit/ModificationDatacards
 
 
@@ -53,7 +54,7 @@ and for multi-modifications:
     * check of the gain of shape analysis, w.r.t just merging
     * easy read a simple cut based analysis, created through the shape package
 
-    python TransformShapeToCutBased.py  -d   hww-19.36fb.mH125.txt
+    python TransformShapeToCutBased.py  -d   hww-19.36fb.mH125_toBeUsed.txt
 
 
 
