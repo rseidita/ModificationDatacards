@@ -148,6 +148,8 @@ def TransformShapeToCutBased (datacardname) :
             # possible global scale of the nuisance (sign may be important for correlation?)
             tempScale = float(tempsystematics[itSampleSyst])
 
+            nameSamepleWithThisNuisance = sampleName[itSampleSyst-2]
+
             # get root file and calculate the uncertainty
             histograms = {}
             for rootFileBin in rootFiles:
@@ -164,7 +166,6 @@ def TransformShapeToCutBased (datacardname) :
                 h = k.ReadObj()
                 # only 1d histograms supported
                 histoName = h.GetName()
-                nameSamepleWithThisNuisance = sampleName[itSampleSyst-2]
 
                 # histo_SAMPLENAME_NUISANCENAME
                 # histo_WJet_CMS_8TeV_hww_WJet_of_2jtche05_stat_bin1
@@ -196,13 +197,32 @@ def TransformShapeToCutBased (datacardname) :
                 integralDown    = histograms["Down"].Integral()
                 integralNominal = histograms["Nominal"].Integral()
 
+                if integralNominal == 0:
+                  integralNominal = 1.0
+                  integralUp      = 1.00
+                  integralDown    = 1.00
+
               rootFile.Close()
 
 
-            # correct nuisance
+            # calculate nuisance
             tempsystematics[itSampleSyst] = str(   (1.00 - (integralNominal-integralDown) / integralNominal ) * tempScale )   + "/" + str(   (1.00 + (integralUp - integralNominal) / integralNominal ) * tempScale )
-            print " now:: ",tempsystematics[itSampleSyst]
+            print " now:: ",tempsystematics[0],"  :: ",nameSamepleWithThisNuisance," = ",tempsystematics[itSampleSyst]
 
+
+        # correct nuisance
+        tempNewNuisance = ""
+
+        #  tempsystematics[0] -> the name
+        #  tempsystematics[1] -> the type: "shape" or "shapeN2"
+
+        for itSampleSyst in range(len(tempsystematics)):
+          tempNewNuisance =  tempNewNuisance + tempsystematics[itSampleSyst]
+          tempNewNuisance =  tempNewNuisance + "  "
+
+        systematics[numSystType] = tempNewNuisance
+
+      numSystType = numSystType + 1
 
 
 
