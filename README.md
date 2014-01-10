@@ -68,3 +68,37 @@ e.g.
     combine hwwof_0j_shape_8TeV.txt  -M MaxLikelihoodFit  --rMin=-1 --expectSignal=1 -t -1
 
     combineCards.py -S sf0j=hwwsf_0j_cut_8TeV.txt sf1j=hwwsf_1j_cut_8TeV.txt of0j=hwwof_0j_shape_8TeV.txt of1j=hwwof_1j_shape_8TeV.txt > total.txt
+
+
+e.g. for ww
+
+
+    cd /afs/cern.ch/user/a/amassiro/Limit/ModificationDatacards
+    mkdir ww
+    scp amassiro@cmsneu:/home/amassiro/Latinos/Shape/playground/WW?Fcut?jet.tgz ww/
+    cd ww
+    tar -xf WWDFcut0jet.tgz
+    mv datacards  WWDFcut0jet
+    tar -xf WWDFcut1jet.tgz
+    mv datacards  WWDFcut1jet
+    tar -xf WWSFcut0jet.tgz
+    mv datacards  WWSFcut0jet
+    tar -xf WWSFcut1jet.tgz
+    mv datacards  WWSFcut1jet
+
+    cd WWDFcut0jet
+    python ../../TransformShapeToCutBased.py  -d   hww-19.36fb.mH125.of_0j_shape.txt
+    cd ..
+    cd WWDFcut1jet
+    python ../../TransformShapeToCutBased.py  -d   hww-19.36fb.mH125.of_1j_shape.txt
+    cd ..
+    cd WWSFcut0jet
+    python ../../TransformShapeToCutBased.py  -d   hww-19.36fb.mH125.sf_0j_shape.txt
+    cd ..
+    cd WWSFcut1jet
+    python ../../TransformShapeToCutBased.py  -d   hww-19.36fb.mH125.sf_1j_shape.txt
+    cd ..
+
+    rm -r WW?Fcut?jet/shapes/
+
+

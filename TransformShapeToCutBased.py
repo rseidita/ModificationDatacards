@@ -48,8 +48,10 @@ def TransformShapeToCutBased (datacardname) :
     header = []
     binName = []
     longListBin = [] # the bin list just before systematics
+    completeSampleNameLine = []
     sampleName = []
     reducedsampleName = [] # remove duplicate!
+    completeSampleRateLine = []
     sampleRate = []
     observation = []
     systematics = []
@@ -76,6 +78,7 @@ def TransformShapeToCutBased (datacardname) :
         elif tempLine[0] == 'observation' :
           observation.append(line)
         elif tempLine[0] == 'process' and firstTimeProcess:
+          completeSampleNameLine.append(line)
           sampleName = line.split (' ')
           sampleName = filter(lambda a: a != 'process', sampleName)
           sampleName = filter(lambda a: a != '', sampleName)
@@ -84,6 +87,7 @@ def TransformShapeToCutBased (datacardname) :
           longListRateIndex.append(line)
         elif tempLine[0] == 'rate' :
           systime = 1
+          completeSampleRateLine.append(line)
           sampleRate = line.split (' ')
           sampleRate = filter(lambda a: a != 'rate', sampleRate)
           sampleRate = filter(lambda a: a != '', sampleRate)
@@ -206,7 +210,7 @@ def TransformShapeToCutBased (datacardname) :
 
 
             # calculate nuisance
-            tempsystematics[itSampleSyst] = str(   (1.00 - (integralNominal-integralDown) / integralNominal ) * tempScale )   + "/" + str(   (1.00 + (integralUp - integralNominal) / integralNominal ) * tempScale )
+            tempsystematics[itSampleSyst] = str( round ( ( (1.00 - (integralNominal-integralDown) / integralNominal ) * tempScale ) , 3 ))   + "/" + str(   round(  (1.00 + (integralUp - integralNominal) / integralNominal ) * tempScale ,  3) )
             print " now:: ",tempsystematics[0],"  :: ",nameSamepleWithThisNuisance," = ",tempsystematics[itSampleSyst]
 
 
@@ -252,10 +256,13 @@ def TransformShapeToCutBased (datacardname) :
       f.write (longListBin[it] + '\n')
 
     # process names (a.k.a. samples)
-    f.write ("process ")
-    for it in range (len (sampleName)) :
-      f.write (sampleName[it] + ' ')
-    f.write ("\n")
+    for it in range (len (completeSampleNameLine)) :
+      f.write (completeSampleNameLine[it] + '\n')
+
+    #f.write ("process ")
+    #for it in range (len (sampleName)) :
+      #f.write (sampleName[it] + ' ')
+    #f.write ("\n")
 
     # long list of rate indexes
     for it in range (len (longListRateIndex)) :
@@ -263,10 +270,12 @@ def TransformShapeToCutBased (datacardname) :
 
 
     # rate
-    f.write ("rate ")
-    for it in range (len (sampleRate)) :
-      f.write (str(sampleRate[it]) + ' ')
-    f.write ("\n")
+    for it in range (len (completeSampleRateLine)) :
+      f.write (completeSampleRateLine[it] + '\n')
+    #f.write ("rate ")
+    #for it in range (len (sampleRate)) :
+      #f.write (str(sampleRate[it]) + ' ')
+    #f.write ("\n")
 
 
     # systematics
@@ -279,17 +288,12 @@ def TransformShapeToCutBased (datacardname) :
         tempsystematics = systematics[numSystType].split (' ')
         tempsystematics = filter(lambda a: a != '', tempsystematics)
 
-        f.write (tempsystematics[0])
-        f.write (" ")
-        f.write ("lnN")
-        f.write (" ")
+        f.write (tempsystematics[0].ljust(48-6))
+        f.write ("lnN".ljust(15))
 
         for itSampleSyst in range(len(tempsystematics)):
-          f.write (" ")
           if itSampleSyst >=2 :
-              f.write(" ")
-              f.write(tempsystematics[itSampleSyst])
-              f.write(" ")
+              f.write(tempsystematics[itSampleSyst].ljust(15))
         f.write ("\n")
       else :
         f.write (systematics[numSystType] + '\n')
