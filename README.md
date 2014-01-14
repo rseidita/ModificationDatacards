@@ -57,6 +57,11 @@ and for multi-modifications:
     python TransformShapeToCutBased.py  -d   hww-19.36fb.mH125_toBeUsed.txt
 
 
+# Clone one sample:
+  clone one sample into a sample with a new name. Used to split VH into ZH and WH
+
+    python CloneSample.py   -d   hww-19.36fb.mH125.txt    -i   inputClonedName.py
+
 
 e.g.
 
@@ -100,5 +105,30 @@ e.g. for ww
     cd ..
 
     rm -r WW?Fcut?jet/shapes/
+
+
+
+
+e.g. for svn datacards https://svnweb.cern.ch/cern/wsvn/cmshcg/trunk/summer2013/
+
+   mkdir couplings
+   cd couplings
+   svn co  svn+ssh://amassiro@svn.cern.ch/reps/cmshcg/trunk/summer2013/couplings/vhww
+
+change VH into ZH and WH: 1.2427/0.4300 = WH/ZH:
+  WH = 74%
+  ZH = 26%
+
+
+
+   svn co  svn+ssh://amassiro@svn.cern.ch/reps/cmshcg/trunk/summer2013/searches/hww2l2v
+   svn co  svn+ssh://amassiro@svn.cern.ch/reps/cmshcg/trunk/summer2013/searches/vhww
+
+
+
+
+
+
+
 
 
