@@ -63,6 +63,19 @@ and for multi-modifications:
     python CloneSample.py   -d   hww-19.36fb.mH125.txt    -i   inputClonedName.py
 
 
+# Remove one sample:
+  remove one sample from the datacard. Used to remove useless (0) ttH sample
+
+    python RemoveSample.py   hww-19.36fb.mH125.sf_0j_shape.txt    -i   inputRemoveName.py
+
+
+
+
+
+
+
+
+
 e.g.
 
     python ../ScaleOneNuisance.py  -d   hwwof_0j_shape_8TeV.txt  -i   ../inputScaleNuisance.py
