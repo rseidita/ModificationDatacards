@@ -32,6 +32,43 @@ from DatacardParser import *
 DC = parseCard(file(args[0]), options)
 nuisToConsider = [ y for y in DC.systs ]
 
+
+
+#for x in DC.exp:
+    #for y in DC.exp[x]:
+        #print "%10s %10s %10.2f +/- %10.2f (rel = %10.2f)" % (x,y,DC.exp[x][y],DC.exp[x][y]*errors[x][y],errors[x][y])
+
+
+
+
+
+# copy header
+# everything up to "observation", included
+
+lines = open (args[0], 'r').read().split ('\n')
+
+header = []
+
+foundObservation = 0
+for line in lines:
+  if (foundObservation == 0) : header.append (line)
+  tempLine = line.split (' ')
+  tempLine = filter(lambda a: a != '', tempLine)
+  if len(tempLine)>0  and   tempLine[0] == 'observation' :
+      foundObservation = 1
+
+
+print header
+
+
+
+
+
+
+# DUMP DC INTO A TXT FILE!!!
+# USE OLD CODE TO COPY THE HEADER!
+
+
 #for nuis in nuisToConsider:
     #if nuis[2] == 'gmN': gmN = nuis[3][0]
     #else               : gmN = 0
