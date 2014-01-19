@@ -58,7 +58,10 @@ and for multi-modifications:
 
 
 # Clone one sample:
-  clone one sample into a sample with a new name. Used to split VH into ZH and WH
+  clone one sample into a sample with a new name. Used to split VH into ZH and WH.
+  Only for cut based datacard!
+  Nuisances are "cloned" to the new sample.
+  No new nuisances are added
 
     python CloneSample.py    hww-19.36fb.mH125.sf_0j_shape.txt     -i   inputClonedName.py
 
