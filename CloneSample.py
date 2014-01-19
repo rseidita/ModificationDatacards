@@ -1,263 +1,146 @@
-#!/usr/bin/python
-
-######################################
-# workaround to disable pyroot parser!
-import sys
-tmpargv = sys.argv
-sys.argv = [ '-b','-n' ]
-import ROOT
-from ROOT import TFile, TH1F, TCanvas, gStyle, TLine
-sys.argv = tmpargv
-from optparse import OptionParser
-######################################
+#
+# Code to remove one sample from the datacard
+#
 
 import re
-import os
-import subprocess
-import operator
-from commands import getstatusoutput
-from operator import itemgetter
+from sys import argv
+import os.path
+from optparse import OptionParser
+from math import sqrt,fabs
 
-import fnmatch
+parser = OptionParser()
+parser.add_option("-i", "--input", dest="nameFileChange", help="file with samples to remove (e.g. ttH)", default='blabla.py')
 
-import math
+(options, args) = parser.parse_args()
+options.bin = True # fake that is a binary output, so that we parse shape lines
+options.noJMax = False
+options.nuisancesToExclude = ''
+options.stat = False
 
-import string
 
-######################################
+nameFactor = {}
+if os.path.exists(options.nameFileChange):
+    handle = open(options.nameFileChange,'r')
+    exec(handle)
+    handle.close()
+print "nameFactor = ", nameFactor
+
+import sys
+sys.path.append('tools')
+from DatacardParser import *
+
+DC = parseCard(file(args[0]), options)
+nuisToConsider = [ y for y in DC.systs ]
 
 
 
-# ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+#for x in DC.exp:
+    #for y in DC.exp[x]:
+        #print "%10s %10s %10.2f +/- %10.2f (rel = %10.2f)" % (x,y,DC.exp[x][y],DC.exp[x][y]*errors[x][y],errors[x][y])
 
-def ChangeNameDatacard (datacardname,nameFileChange) :
 
-    # open the datacard file
 
-    currentFolder = getstatusoutput ('pwd')[1]
-    datacardname = currentFolder + '/' +  datacardname 
-    print 'Opening original input datacard: ', datacardname
-    lines = open (datacardname, 'r').read().split ('\n')
-    nametag = datacardname.split ('/')[-1].replace ('.txt', '')
-    thepath = datacardname.replace (nametag + '.txt', '')
 
-    print "nametag = ",nametag
-    print "thepath = ",thepath
 
-    # read datacard and separate bin, sample, rate, ...
+# copy header
+# everything up to "observation", included
 
-    systime = 0
-    header = []
-    binName = []
-    longListBin = [] # the bin list just before systematics
-    sampleName = []
-    reducedsampleName = [] # remove duplicate!
-    sampleRate = []
-    observation = []
-    systematics = []
-    systematicsName = []
-    longListRateIndex = []
-    rootFiles = {}
-    firstTimeBin = True
-    firstTimeProcess = True
-    for line in lines:
-      if '---' in line : continue
-      if systime == 0 :
-        tempLine = line.split (' ')
-        tempLine = filter(lambda a: a != '', tempLine)
-        #print " line.split (' ')[0] = ", line.split (' ')[0], "\n"
-        if len(tempLine) == 0 : continue #skip if empty
-        if tempLine[0] == 'bin' and firstTimeBin:
-          binName = line.split (' ')
-          binName = filter(lambda a: a != 'bin', binName)
-          binName = filter(lambda a: a != '', binName)
-          firstTimeBin = False
-        elif tempLine[0] == 'bin':
-          longListBin.append(line)
-        elif tempLine[0] == 'observation' :
-          observation.append(line)
-        elif tempLine[0] == 'process' and firstTimeProcess:
-          sampleName = line.split (' ')
-          sampleName = filter(lambda a: a != 'process', sampleName)
-          sampleName = filter(lambda a: a != '', sampleName)
-          firstTimeProcess = False
-        elif tempLine[0] == 'process':
-          longListRateIndex.append(line)
-        elif tempLine[0] == 'rate' :
-          systime = 1
-          sampleRate = line.split (' ')
-          sampleRate = filter(lambda a: a != 'rate', sampleRate)
-          sampleRate = filter(lambda a: a != '', sampleRate)
+lines = open (args[0], 'r').read().split ('\n')
+
+header = []
+
+foundObservation = 0
+for line in lines:
+  if (foundObservation == 0) : header.append (line)
+  tempLine = line.split (' ')
+  tempLine = filter(lambda a: a != '', tempLine)
+  if len(tempLine)>0  and   tempLine[0] == 'observation' :
+      foundObservation = 1
+
+
+print header
+
+print "#####################################"
+#print DC.list_of_bins
+listOfBins = DC.list_of_bins()
+for binIterator in listOfBins:
+    print binIterator
+print "#####################################"
+
+
+# write new datacard
+filename = 'test.txt'
+f = open(filename, 'w')
+
+# header
+for line in header: f.write (line + '\n')
+f.write ("---------------------------------------------------------------------------------------------------- \n")
+# bin name
+f.write ("bin                                 ")
+for channel in DC.exp:
+    for samples in DC.exp[channel]:
+        f.write ("%13s " % channel)
+f.write("\n")
+
+# process names (a.k.a. samples)
+f.write ("process                            ")
+for channel in DC.exp:
+    for samples in DC.exp[channel]:
+        f.write ("%13s " % samples)
+f.write("\n")
+
+# indices numbers: -1  0  1  2  3 ...
+f.write ("process                            ")
+for channel in DC.exp:
+    numSig = 0
+    numBkg = 1
+    for samples in DC.exp[channel]:
+        if DC.isSignal[samples] :
+            f.write ("%13d " % numSig)
+            numSig = numSig - 1
         else :
-          header.append (line)
-          # 0 1 2 3
-          #shapes * hwwof_1j_shape_7TeV hwwof_1j.input_7TeV.root histo_$PROCESS histo_$PROCESS_$SYSTEMATIC
-        if tempLine[0] == 'shapes' :
-            tempRootList = line.split (' ')
-            tempRootList = filter(lambda a: a != '', tempRootList)
-            if tempRootList[1] == '*' :
-              rootFiles[tempRootList[2]] = tempRootList[3]
-      else:
-        systematics.append (line)
-        systematicsName.append (line.split (' ')[0])
+            f.write ("%13d " % numBkg)
+            numBkg = numBkg + 1
+f.write("\n")
 
-    # clean empty systematics
-    systematics = [elem for elem in systematics if len (elem.split ()) > 0]
-    systematicsName = [elem for elem in systematicsName if len (elem.split ()) > 0]
+# rate
+f.write ("rate ")
+for channel in DC.exp:
+    for process in DC.exp[channel]:
+        f.write ("%9.4f " % DC.exp[channel][process] )
+f.write("\n")
 
-    #print "header = ", header, "\n\n"
-    #print "binName = ", binName, "\n\n"
-    #print "sampleName = ", sampleName, "\n\n"
-    #print "sampleRate = ", sampleRate, "\n\n"
-    #print "systematics = ", systematics, "\n\n"
-    #print "systematicsName = ", systematicsName, "\n\n"
-    #print " --------------------------------------------------------------- "
+# systematics
+## list of [(name of uncert, boolean to indicate whether to float this nuisance or not, type, list of what additional arguments (e.g. for gmN), keyline element)]
+for nuis in nuisToConsider:
+    f.write ("%25s" % nuis[0]) # name
+    if nuis[2] != 'gmN':
+        f.write ("%10s" % nuis[2]) #lnN
+    else :
+        f.write ("%5s" % nuis[2]) # gmN
+        f.write ("%5s" % nuis[3][0]) # Ncontrol
 
-    nameFactor = {}
-    if os.path.exists(nameFileChange):
-      handle = open(nameFileChange,'r')
-      exec(handle)
-      handle.close()
+    f.write (" ")
 
-    print "nameFactor = ", nameFactor
-
-
-
-    # modify name with nameFactor
-    newSampleName = []
-    for name in sampleName:
-      newName = name
-      if name in nameFactor :
-         newName = nameFactor[ name ]
-      newSampleName.append(newName)
-
-    # remove duplicates in "sampleName"
-    # used in scaling histograms in case of "matching"
-    # and in case the same sample name is used in several "bin"
-    # NB: the order is not preserved, but who cares!
-    reducedsampleName = list(set(sampleName))
-
-    for rootFileBin in rootFiles:
-      print "rootFile[", rootFileBin, "] = ",rootFiles[rootFileBin]
-      # check if root file is present (the name must end with .root)
-      matchfile = re.search(".root", rootFiles[rootFileBin])
-      if not matchfile:
-       continue
-      rootFile = ROOT.TFile.Open(str(thepath)+"/"+str(rootFiles[rootFileBin]))
-
-      # get the histograms
-      histograms = {}
-      for k in rootFile.GetListOfKeys():
-        h = k.ReadObj()
-        # only 1d histograms supported
-        histoName = h.GetName()
-        match = re.search("histo_", histoName)
-        if not match:
-          continue
-        histograms[h.GetName()] = h
-        #histograms[h.GetTitle()] = h
-
-      # modify the histograms
-      outFile = ROOT.TFile.Open(str(thepath)+"/"+str(rootFiles[rootFileBin]+".new.root"),'recreate')
+    for channel in DC.exp:
+        for process in DC.exp[channel]:
+            if channel in nuis[4]:
+                if process in nuis[4][channel] :
+                    if not isinstance ( nuis[4][channel][process], float ) :
+                    # [0.95, 1.23]  ---> from 0.95/1.23
+                        f.write ("   {0:4.3f}/{1:4.3f}".format(nuis[4][channel][process][0], nuis[4][channel][process][1]))
+                    else :
+                        if (nuis[4][channel][process] != 0) :
+                            f.write ("%9.4f" % nuis[4][channel][process])
+                        else :
+                            f.write ("%13s" % "-")
+                else :
+                    f.write ("%13s" % "-")
+            else :
+                f.write ("%13s" % "-")
+    f.write("\n")
+f.close ()
 
 
-      for histoName, histogram in histograms.iteritems():
-        for sample in reducedsampleName:
-          #print "histoName = ",histoName
-          match = re.search("histo_"+str(sample)+"_", histoName)  # comment, if "for Rebeca"
-          #match = re.search("histo_"+str(sample), histoName) # for Rebeca
-          match2 = bool("histo_"+str(sample) == histoName)
-          if match or match2:
-            newName = sample
-            if sample in nameFactor :
-              newName = nameFactor[ sample ]
-              #match = re.search("histo_"+str(sample)+"_", histoName
-              if match2 :
-                newName = "histo_"+newName
-                histogram.SetName(newName)
-              elif match :
-                nameTemp    = "histo_"+str(sample)+"_"
-                newnameTemp = "histo_"+str(newName)+"_"
-                #string.replace(s, old, new[, maxreplace])
-                newhistoName = string.replace(histoName, nameTemp, newnameTemp, 1)
-                print "newhistoName",newhistoName
-                histogram.SetName(newhistoName)
-
-      # save new root file
-      for n,h in histograms.iteritems():
-        h.Write()
-      outFile.Close()
-
-      os.system ("mv "+str(thepath)+"/"+str(rootFiles[rootFileBin])+".new.root "+str(thepath)+"/"+str(rootFiles[rootFileBin]))
-      print "mv "+str(thepath)+"/"+str(rootFiles[rootFileBin])+".new.root "+str(thepath)+"/"+str(rootFiles[rootFileBin])
-
-
-    # write new datacard
-    filename = str(thepath) + '/' + str(nametag) + '.txt'
-    f = open(filename, 'w')
-
-    # header
-    for line in header: f.write (line + '\n')
-
-    f.write ("---------------------------------------------------------------------------------------------------- \n")
-    # bin name
-    f.write ("bin ")
-    for it in range (len (binName)) :
-      f.write (binName[it] + ' ')
-    f.write ("\n")
-
-    # observation
-    for it in range (len (observation)) :
-      f.write (observation[it] + '\n')
-
-    f.write ("---------------------------------------------------------------------------------------------------- \n")
-    # long list of bin
-    for it in range (len (longListBin)) :
-      f.write (longListBin[it] + '\n')
-
-    # process names (a.k.a. samples)
-    f.write ("process ")
-    for it in range (len (newSampleName)) :
-      f.write (newSampleName[it] + ' ')
-    f.write ("\n")
-
-    # long list of rate indexes
-    for it in range (len (longListRateIndex)) :
-      f.write (longListRateIndex[it] + '\n')
-
-
-    # rate
-    f.write ("rate ")
-    for it in range (len (sampleRate)) :
-      f.write (str(sampleRate[it]) + ' ')
-    f.write ("\n")
-
-
-   # systematics
-    f.write ("---------------------------------------------------------------------------------------------------- \n")
-    for it in range (len (systematics)) :
-      f.write (systematics[it] + '\n')
-
-    f.close ()
-
-
-
-######################################
-
-
-if __name__ == '__main__':
-
-
-    #if len (sys.argv) < 2 :
-        #print 'input datacard folder missing\n'
-        #exit (1)
-
-    parser = OptionParser()
-    parser.add_option("-d", "--datacard", dest="datacardInput", help="datacard name", metavar="DATACARD")
-    parser.add_option("-i", "--input", dest="nameFileChange", help="name changing file (e.g. from VV to YY)", default='blabla.py')
-
-    (options, args) = parser.parse_args()
-
-    ChangeNameDatacard (options.datacardInput,options.nameFileChange)
 
 
