@@ -9,7 +9,8 @@ from optparse import OptionParser
 from math import sqrt,fabs
 
 parser = OptionParser()
-parser.add_option("-i", "--input", dest="nameFileChange", help="file with samples to remove (e.g. ttH)", default='blabla.py')
+parser.add_option("-i", "--input",  dest="nameFileChange", help="file with samples to remove (e.g. ttH)", default='blabla.py')
+parser.add_option("-o", "--output", dest="nameOutFileDC",  help="file where to dump the new DC", default='test.txt')
 
 (options, args) = parser.parse_args()
 options.bin = True # fake that is a binary output, so that we parse shape lines
@@ -61,7 +62,7 @@ print "#####################################"
 
 
 # write new datacard
-filename = 'test.txt'
+filename = options.nameOutFileDC
 f = open(filename, 'w')
 
 # header

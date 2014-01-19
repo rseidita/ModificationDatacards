@@ -34,14 +34,6 @@ nuisToConsider = [ y for y in DC.systs ]
 
 
 
-#for x in DC.exp:
-    #for y in DC.exp[x]:
-        #print "%10s %10s %10.2f +/- %10.2f (rel = %10.2f)" % (x,y,DC.exp[x][y],DC.exp[x][y]*errors[x][y],errors[x][y])
-
-
-
-
-
 # copy header
 # everything up to "observation", included
 
@@ -78,15 +70,19 @@ f.write ("----------------------------------------------------------------------
 # bin name
 f.write ("bin                                 ")
 for channel in DC.exp:
-    for samples in DC.exp[channel]:
-        f.write ("%13s " % channel)
+    for process in DC.exp[channel]:
+        #print nameFactor.keys() --> ['WJet', 'ttH', 'qqH', 'VV']
+        if (process not in nameFactor.keys()) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
+            f.write ("%13s " % channel)
 f.write("\n")
 
-# process names (a.k.a. samples)
+# process names (a.k.a. process)
 f.write ("process                            ")
 for channel in DC.exp:
-    for samples in DC.exp[channel]:
-        f.write ("%13s " % samples)
+    for process in DC.exp[channel]:
+        if (process not in nameFactor.keys()) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
+            f.write ("%13s " % process)
+
 f.write("\n")
 
 # indices numbers: -1  0  1  2  3 ...
@@ -94,20 +90,22 @@ f.write ("process                            ")
 for channel in DC.exp:
     numSig = 0
     numBkg = 1
-    for samples in DC.exp[channel]:
-        if DC.isSignal[samples] :
-            f.write ("%13d " % numSig)
-            numSig = numSig - 1
-        else :
-            f.write ("%13d " % numBkg)
-            numBkg = numBkg + 1
+    for process in DC.exp[channel]:
+        if (process not in nameFactor.keys()) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
+            if DC.isSignal[process] :
+                f.write ("%13d " % numSig)
+                numSig = numSig - 1
+            else :
+                f.write ("%13d " % numBkg)
+                numBkg = numBkg + 1
 f.write("\n")
 
 # rate
 f.write ("rate ")
 for channel in DC.exp:
     for process in DC.exp[channel]:
-        f.write ("%9.4f " % DC.exp[channel][process] )
+        if (process not in nameFactor.keys()) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
+            f.write ("%9.4f " % DC.exp[channel][process] )
 f.write("\n")
 
 # systematics
@@ -124,20 +122,21 @@ for nuis in nuisToConsider:
 
     for channel in DC.exp:
         for process in DC.exp[channel]:
-            if channel in nuis[4]:
-                if process in nuis[4][channel] :
-                    if not isinstance ( nuis[4][channel][process], float ) :
-                    # [0.95, 1.23]  ---> from 0.95/1.23
-                        f.write ("   {0:4.3f}/{1:4.3f}".format(nuis[4][channel][process][0], nuis[4][channel][process][1]))
-                    else :
-                        if (nuis[4][channel][process] != 0) :
-                            f.write ("%9.4f" % nuis[4][channel][process])
+            if (process not in nameFactor.keys()) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
+                if channel in nuis[4]:
+                    if process in nuis[4][channel] :
+                        if not isinstance ( nuis[4][channel][process], float ) :
+                        # [0.95, 1.23]  ---> from 0.95/1.23
+                            f.write ("   {0:4.3f}/{1:4.3f}".format(nuis[4][channel][process][0], nuis[4][channel][process][1]))
                         else :
-                            f.write ("%13s" % "-")
+                            if (nuis[4][channel][process] != 0) :
+                                f.write ("%9.4f" % nuis[4][channel][process])
+                            else :
+                                f.write ("%13s" % "-")
+                    else :
+                        f.write ("%13s" % "-")
                 else :
                     f.write ("%13s" % "-")
-            else :
-                f.write ("%13s" % "-")
     f.write("\n")
 f.close ()
 
