@@ -1,7 +1,9 @@
 #
-# clone VV into YY
+# clone VV into YY  and     AA into BB     in the channel CHANNEL
 #
 
-nameFactor.update({'VV'  : 'YY'})
-nameFactor.update({'qqH' : 'VBF'})
+
+nameFactor.update({'CHANNEL':  [['VV','YY'],  ['AA','BB']]})
+nameFactor.update({'of_1j': [['qqH', 'VBF'], ['WJet','BLABLA']]})
+nameFactor.update({'sf_0j': [['WW', 'NUOVO'], ['Top','SuperTop']]})
 
