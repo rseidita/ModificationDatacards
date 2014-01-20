@@ -8,6 +8,8 @@ Example working folder:
     cmsneu
     /afs/cern.ch/user/a/amassiro/Limit/ModificationDatacards
 
+    /home/amassiro/Cern/Code/VBF/RepositoryDataCardNewLumi/summer2013/ModificationDatacards
+
 
 
 # Scale one sample by a factor
@@ -17,7 +19,7 @@ Example working folder:
 and for multi-modifications:
 
     bash examples/doScale125to126GeV.sh
-    
+
 
 # Change the name of one sample
 
@@ -63,7 +65,7 @@ and for multi-modifications:
  example:
 
     bash examples/doRemoveTTH.sh
-    
+
     bash examples/doTransformSVNDatacardsSearchesCouplings.sh
 
 
