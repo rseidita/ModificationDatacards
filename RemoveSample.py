@@ -42,13 +42,13 @@ lines = open (args[0], 'r').read().split ('\n')
 
 header = []
 
-foundObservation = 0
+foundSecondTimeBin = 0
 for line in lines:
-  if (foundObservation == 0) : header.append (line)
   tempLine = line.split (' ')
   tempLine = filter(lambda a: a != '', tempLine)
-  if len(tempLine)>0  and   tempLine[0] == 'observation' :
-      foundObservation = 1
+  if len(tempLine)>0  and   tempLine[0] == 'bin' :    # the second time "bin" is the big list --> not in the header!
+      foundSecondTimeBin = foundSecondTimeBin+1      
+  if (foundSecondTimeBin <= 1) : header.append (line)
 
 
 print header
@@ -79,19 +79,22 @@ f.write("\n")
 
 # process names (a.k.a. process)
 f.write ("process                            ")
-for channel in DC.exp:
-    for process in DC.exp[channel]:
+for channel, samples  in DC.exp.items():
+    #print samples
+    for process,rate in samples.items():
+    #for process in DC.exp[channel]:
         if (process not in nameFactor.keys()) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
             f.write ("%13s " % process)
+            #print "process = ",process
 
 f.write("\n")
 
 # indices numbers: -1  0  1  2  3 ...
 f.write ("process                            ")
-for channel in DC.exp:
+for channel, samples  in DC.exp.items():
     numSig = 0
     numBkg = 1
-    for process in DC.exp[channel]:
+    for process,rate in samples.items():
         if (process not in nameFactor.keys()) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
             if DC.isSignal[process] :
                 f.write ("%13d " % numSig)
@@ -103,11 +106,13 @@ f.write("\n")
 
 # rate
 f.write ("rate ")
-for channel in DC.exp:
-    for process in DC.exp[channel]:
+for channel, samples  in DC.exp.items():
+    for process,rate in samples.items():
         if (process not in nameFactor.keys()) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
             f.write ("%9.4f " % DC.exp[channel][process] )
 f.write("\n")
+
+f.write ("---------------------------------------------------------------------------------------------------- \n")
 
 # systematics
 ## list of [(name of uncert, boolean to indicate whether to float this nuisance or not, type, list of what additional arguments (e.g. for gmN), keyline element)]
@@ -121,8 +126,8 @@ for nuis in nuisToConsider:
 
     f.write (" ")
 
-    for channel in DC.exp:
-        for process in DC.exp[channel]:
+    for channel, samples  in DC.exp.items():
+        for process,rate in samples.items(): 
             if (process not in nameFactor.keys()) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
                 if channel in nuis[4]:
                     if process in nuis[4][channel] :
