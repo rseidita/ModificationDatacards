@@ -92,8 +92,9 @@ def TransformShapeToCutBased (datacardname) :
           sampleRate = filter(lambda a: a != 'rate', sampleRate)
           sampleRate = filter(lambda a: a != '', sampleRate)
         else :
-          header.append (line)
-          # 0 1 2 3
+          if ".root" not in line :
+              header.append (line)
+          # 0     1       2                         3
           #shapes * hwwof_1j_shape_7TeV hwwof_1j.input_7TeV.root histo_$PROCESS histo_$PROCESS_$SYSTEMATIC
         if tempLine[0] == 'shapeN2' or tempLine[0] == 'shapes' :
             tempRootList = line.split (' ')
