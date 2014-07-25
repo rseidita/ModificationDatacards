@@ -70,6 +70,15 @@ and for multi-modifications:
 
 
 
+# Change name of nuisances
+
+  change the name of the nuisances in the datacard,
+  for example "met" into "met_res" or adding "_7TeV" on some nuisances.
+
+    python ChangeNameNuisance.py  -d   hww-19.36fb.mH125_toBeUsed.txt      -i   inputNameNuisance.py
+
+
+
 # Specific examples
 
 
