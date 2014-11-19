@@ -128,6 +128,34 @@ e.g. for ww
 
 
 
+e.g. for hwidth hww
+
+
+    cd /afs/cern.ch/user/a/amassiro/Limit/ModificationDatacards
+    mkdir hwidth
+    scp amassiro@cmsneu:/home/amassiro/Latinos/Shape/playground/Hwidth/?jetDF8TeV.tgz  hwidth/
+    cd hwidth
+    tar -xf 0jetDF8TeV.tgz
+    mv datacards  0jetDF8TeV
+    tar -xf 1jetDF8TeV.tgz
+    mv datacards  1jetDF8TeV
+    tar -xf 2jetDF8TeV.tgz
+    mv datacards  2jetDF8TeV
+
+    cd 0jetDF8TeV
+    python ../../TransformShapeToCutBased.py  -d   hww-19.36fb.mH125.of_0j_shape.txt
+    cd ..
+    cd 1jetDF8TeV
+    python ../../TransformShapeToCutBased.py  -d   hww-19.36fb.mH125.of_1j_shape.txt
+    cd ..
+    cd 2jetDF8TeV
+    python ../../TransformShapeToCutBased.py  -d   hww-19.36fb.mH125.of_2j_shape.txt
+    cd ..
+
+    rm -r ?jetDF8TeV/shapes/
+
+
+
 
 e.g. for svn datacards https://svnweb.cern.ch/cern/wsvn/cmshcg/trunk/summer2013/
 
