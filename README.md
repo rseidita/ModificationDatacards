@@ -159,9 +159,9 @@ e.g. for hwidth hww
 
 e.g. for svn datacards https://svnweb.cern.ch/cern/wsvn/cmshcg/trunk/summer2013/
 
-   mkdir couplings
-   cd couplings
-   svn co  svn+ssh://amassiro@svn.cern.ch/reps/cmshcg/trunk/summer2013/couplings/vhww
+    mkdir couplings
+    cd couplings
+    svn co  svn+ssh://amassiro@svn.cern.ch/reps/cmshcg/trunk/summer2013/couplings/vhww
 
 change VH into ZH and WH: 1.2427/0.4300 = WH/ZH:
   WH = 74%
