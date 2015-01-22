@@ -169,6 +169,17 @@ def ScaleDatacard (datacardname,xsecScale) :
           match = re.search("histo_"+str(sample)+"_", histoName)  # comment, if "for Rebeca"
           #match = re.search("histo_"+str(sample), histoName) # for Rebeca
           match2 = bool("histo_"+str(sample) == histoName)
+          
+          #print " match:match2 = ",match," ",match2," histoName = ",histoName, " sample = ", sample
+          # NB: it's a problem if there are two samples with similar names
+          #     that differ by an "_"
+          #     for example ggH and ggH_b
+          #     since the matching procedure described above won't work
+          #
+          # Solution: 1) modify the code to loop over the nuisances
+          #           2) don't use this naming convention!
+          #
+          
           if match or match2:
             additionalScale = 1.
             if sample in scaleFactor :
