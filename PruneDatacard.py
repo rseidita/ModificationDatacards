@@ -1,5 +1,13 @@
 #!/usr/bin/python
 
+###   
+###      _ \                                 __ \          |                                 |       
+###     |   |   __|  |   |  __ \    _ \      |   |   _` |  __|   _` |   __|   _` |   __|  _` |   __| 
+###     ___/   |     |   |  |   |   __/      |   |  (   |  |    (   |  (     (   |  |    (   | \__ \ 
+###    _|     _|    \__,_| _|  _| \___|     ____/  \__,_| \__| \__,_| \___| \__,_| _|   \__,_| ____/ 
+###                                                                                                  
+###   
+
 ######################################
 # workaround to disable pyroot parser!
 import sys
@@ -121,15 +129,6 @@ def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration) :
 
     print "nuisancesToPrune = ", nuisancesToPrune
 
-
-    ## modify name with nameFactor
-    #newNuisanceName = []
-    #for name in systematicsName:
-      #newName = name
-      #if name in nameFactor :
-         #newName = nameFactor[ name ]
-      #newNuisanceName.append(newName)
-
     # remove duplicates in "sampleName"
     # used in scaling histograms in case of "matching"
     # and in case the same sample name is used in several "bin"
@@ -156,11 +155,7 @@ def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration) :
         if not match:
           continue
         histograms[h.GetName()] = h
-
       #print " histograms = ", histograms
-      
-      # modify the histograms
-      #outFile = ROOT.TFile.Open(str(thepath)+"/"+str(rootFiles[rootFileBin]+".new.root"),'recreate')
 
       nuisance_to_be_removed = []
       for nuisance in systematicsName :
@@ -195,13 +190,14 @@ def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration) :
                   down    = histo_down.GetBinContent(ibin+1)
                   
                   # calculate maximum relative variation
+                  #  - if for any reason I have negative entries, that nuisance is kept!
                   if nominal > 0 :
                     if max_var_up < abs((nominal - up)/math.sqrt(nominal)) : 
                       max_var_up = abs((nominal - up)/math.sqrt(nominal))
                     if max_var_down < abs((nominal - down)/math.sqrt(nominal)) : 
                       max_var_down = abs((nominal - down)/math.sqrt(nominal))
                 
-                # same the value
+                # save the value
                 nuisance_to_be_removed_samples[sample] = (max_var_down, max_var_up)
                  
             max_variation = 0     
