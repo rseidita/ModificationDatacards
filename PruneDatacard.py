@@ -24,6 +24,7 @@ import math
 
 import string
 
+
 ######################################
 
 # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -156,33 +157,63 @@ def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration) :
           continue
         histograms[h.GetName()] = h
 
+      #print " histograms = ", histograms
+      
       # modify the histograms
       #outFile = ROOT.TFile.Open(str(thepath)+"/"+str(rootFiles[rootFileBin]+".new.root"),'recreate')
 
-
-      #for histoName, histogram in histograms.iteritems():
-        #for nuisance in systematicsName :
-           #for sample in reducedsampleName:
-             #match = bool("histo_"+str(sample)+"_"+str(nuisance)+"Down" == histoName) or bool("histo_"+str(sample)+"_"+str(nuisance)+"Up" == histoName)
-             #if match:
-               #if nuisance in nameFactor :
-                 #newName = nameFactor[ nuisance ]
-
-                 #nameTemp    = "histo_"+str(sample)+"_"+str(nuisance)
-                 #newnameTemp = "histo_"+str(sample)+"_"+str(newName)
-                 ##string.replace(s, old, new[, maxreplace])
-                 #newhistoName = string.replace(histoName, nameTemp, newnameTemp, 1)
-                 #print "newhistoName",newhistoName
-                 #histogram.SetName(newhistoName)
-
-      ## save new root file
-      #for n,h in histograms.iteritems():
-        #h.Write()
-      #outFile.Close()
-
-      #os.system ("mv "+str(thepath)+"/"+str(rootFiles[rootFileBin])+".new.root "+str(thepath)+"/"+str(rootFiles[rootFileBin]))
-      #print "mv "+str(thepath)+"/"+str(rootFiles[rootFileBin])+".new.root "+str(thepath)+"/"+str(rootFiles[rootFileBin])
-
+      nuisance_to_be_removed = []
+      for nuisance in systematicsName :
+        for  hr_list_nuisances_to_test, nuisance_to_test in nuisancesToPrune.iteritems() :
+          #print " hr_list_nuisances_to_test = ", hr_list_nuisances_to_test, " -> ", nuisance_to_test
+          matchNuisance = fnmatch.fnmatch(str(nuisance), nuisance_to_test)
+          if matchNuisance :
+            #print "matchNuisance[", nuisance_to_test, "] -> ", nuisance
+            # relative variation
+            nuisance_to_be_removed_samples = {}
+            
+            for sample in reducedsampleName:
+              nameTempUp   = "histo_"+str(sample)+"_"+str(nuisance)+"Up"
+              nameTempDown = "histo_"+str(sample)+"_"+str(nuisance)+"Down"
+              nameTemp     = "histo_"+str(sample)
+              
+              if nameTempUp in histograms.keys() and  nameTempDown in histograms.keys() : 
+                #print 'nameTemp = ', nameTemp
+                #print 'nameTempUp   = ', nameTempUp
+                #print 'nameTempDown = ', nameTempDown
+                
+                histo_nominal = histograms[nameTemp] 
+                histo_up   = histograms[nameTempUp] 
+                histo_down = histograms[nameTempDown] 
+                
+                max_var_up = 0
+                max_var_down = 0
+                
+                for ibin in range( histo_nominal.GetNbinsX() ) :
+                  nominal = histo_nominal.GetBinContent(ibin+1)
+                  up      = histo_up.GetBinContent(ibin+1)
+                  down    = histo_down.GetBinContent(ibin+1)
+                  
+                  # calculate maximum relative variation
+                  if nominal > 0 :
+                    if max_var_up < abs((nominal - up)/math.sqrt(nominal)) : 
+                      max_var_up = abs((nominal - up)/math.sqrt(nominal))
+                    if max_var_down < abs((nominal - down)/math.sqrt(nominal)) : 
+                      max_var_down = abs((nominal - down)/math.sqrt(nominal))
+                
+                # same the value
+                nuisance_to_be_removed_samples[sample] = (max_var_down, max_var_up)
+                 
+            max_variation = 0     
+            for sampleName, values in nuisance_to_be_removed_samples.iteritems() :
+              if max_variation < values[0] or  max_variation < values[1] :
+                max_variation = max(values[0], values[1])
+            
+            if max_variation < 0.10 :
+              nuisance_to_be_removed.append(nuisance)
+              print " To be removed: ", nuisance, " --> ", max_variation
+             
+ 
 
     # write new datacard
     filename = datacardnameOut
@@ -229,25 +260,8 @@ def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration) :
     f.write ("---------------------------------------------------------------------------------------------------- \n")
     numSyst = 0
     for nuisance in systematicsName :
-      #if nuisance in nameFactor :
-        #newName = nameFactor[ nuisance ]
-        ## change nuisance name
-        #print "systematics : ",nuisance, " --> ", newName
-        #tempsystematics = systematics[numSyst].split (' ')
-        #tempsystematics = filter(lambda a: a != '', tempsystematics)
-
-        #f.write (newName)
-        #f.write (" ")
-
-        #for itSampleSyst in range(len(tempsystematics)):
-          #if itSampleSyst >=1 :
-              #f.write(" ")
-              #f.write(tempsystematics[itSampleSyst])
-              #f.write(" ")
-        #f.write ("\n")
-      #else :
-        #f.write (systematics[numSyst] + '\n')
-
+      if nuisance not in nuisance_to_be_removed :
+        f.write (systematics[numSyst] + '\n')
       numSyst+=1
 
 
