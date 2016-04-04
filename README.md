@@ -10,7 +10,11 @@ Example working folder:
 
     /home/amassiro/Cern/Code/VBF/RepositoryDataCardNewLumi/summer2013/ModificationDatacards
 
+Kate:
 
+    lxplus-Combine
+    
+    
 # Prune nuisances
 
 Check if a nuisance, selected by a string match with wild cards, has an effect smaller than A %.
@@ -18,6 +22,13 @@ If yes, remove the nuisance.
 Create a copy of the datacard, do not touch the root file.
 
     python PruneDatacard.py  -d hwwof_shape.txt  -o hwwof_shape_pruned.txt  -i nuisances_to_prune.py
+    
+    python PruneDatacard.py  \
+        -d /afs/cern.ch/user/a/amassiro/Framework/CMSSW_7_6_3/src/PlotsConfigurations/Configurations/ggHTest/datacards/hww2l2v_13TeV_em_0j/mllVSmth/datacard.txt  \
+        -o datacard.test.txt  \
+        -i examples/input_nuisances_to_prune.py    
+    
+    
     
     
 # Scale one sample by a factor
