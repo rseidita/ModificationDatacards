@@ -5,13 +5,21 @@ Several scripts to modify datacards
 
 Example working folder:
 
-    cmsneu
+    cmsneu/lxplus
     /afs/cern.ch/user/a/amassiro/Limit/ModificationDatacards
 
     /home/amassiro/Cern/Code/VBF/RepositoryDataCardNewLumi/summer2013/ModificationDatacards
 
 
+# Prune nuisances
 
+Check if a nuisance, selected by a string match with wild cards, has an effect smaller than A %.
+If yes, remove the nuisance.
+Create a copy of the datacard, do not touch the root file.
+
+    python PruneDatacard.py  -d hwwof_shape.txt  -o hwwof_shape_pruned.txt  -i nuisances_to_prune.py
+    
+    
 # Scale one sample by a factor
 
     python ScaleOneSample.py  -d hwwof_2j_shape_7TeV.txt    -i inputScale7TeV.py
