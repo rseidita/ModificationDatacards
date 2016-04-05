@@ -37,7 +37,7 @@ import string
 
 # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration) :
+def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration, threshold) :
 
     # open the datacard file
 
@@ -201,11 +201,12 @@ def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration) :
                 nuisance_to_be_removed_samples[sample] = (max_var_down, max_var_up)
                  
             max_variation = 0     
-            for sampleName, values in nuisance_to_be_removed_samples.iteritems() :
+            for sampleNameToCheck, values in nuisance_to_be_removed_samples.iteritems() :
               if max_variation < values[0] or  max_variation < values[1] :
                 max_variation = max(values[0], values[1])
             
-            if max_variation < 0.10 :
+            # default value of threshold is 0.10
+            if max_variation < threshold :
               nuisance_to_be_removed.append(nuisance)
               print " To be removed: ", nuisance, " --> ", max_variation
              
@@ -264,7 +265,6 @@ def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration) :
     f.close ()
 
 
-
 ######################################
 
 
@@ -274,9 +274,13 @@ if __name__ == '__main__':
     parser.add_option("-d", "--datacard",           dest="datacardInput",          help="datacard name", metavar="DATACARD")
     parser.add_option("-o", "--outdatacard",        dest="datacardOutput",         help="datacard name output", metavar="DATACARD")
     parser.add_option("-i", "--inputConfiguration", dest="nameFileConfiguration",  help="name configuration file with nuisances to remove", default='blabla.py')
+    parser.add_option("-t", "--threshold",          dest="threshold",              help="threshold", default=0.10,  type='float')
 
     (options, args) = parser.parse_args()
 
-    PruneDatacard (options.datacardInput, options.datacardOutput, options.nameFileConfiguration)
+    PruneDatacard (options.datacardInput, options.datacardOutput, options.nameFileConfiguration,  options.threshold)
+    
+    print "options.threshold = ", options.threshold
+    
 
 
