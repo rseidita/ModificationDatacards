@@ -35,6 +35,35 @@ import string
 
 ######################################
 
+def GetPoissError(numberEvents, down, up):
+
+    alpha = (1-0.6827)
+    L = 0
+    if numberEvents!=0 : 
+      L = ROOT.Math.gamma_quantile (alpha/2,numberEvents,1.)
+    U = 0
+    if numberEvents==0 :
+      U = ROOT.Math.gamma_quantile_c (alpha,numberEvents+1,1.) 
+      #print "u = ", U
+    else :
+      U = ROOT.Math.gamma_quantile_c (alpha/2,numberEvents+1,1.)
+      
+    # the error
+    L = numberEvents - L
+    if numberEvents > 0 :
+      U = U - numberEvents
+    #else :
+      #U = 1.14 # --> bayesian interval Poisson with 0 events observed
+      #1.14790758039 from 10 lines above
+      
+    if up and not down :
+      return U
+    if down and not up :
+      return L
+    if up and down :
+      return (L,U)
+        
+        
 # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration, threshold) :
@@ -186,16 +215,26 @@ def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration, thresho
                 
                 for ibin in range( histo_nominal.GetNbinsX() ) :
                   nominal = histo_nominal.GetBinContent(ibin+1)
+                  uncertainty_nominal = 0
+                  if nominal >= 0 :
+                    uncertainty_nominal = GetPoissError(nominal , 0, 1) 
+                  
+                  #if nominal >= 0 :
+                    #print "nominal = ", nominal, " ---> uncertainty_nominal = ", uncertainty_nominal, " ~ sqrt = ", math.sqrt(nominal)
+                  #else :
+                    #print "nominal = ", nominal, " ---> uncertainty_nominal = ", uncertainty_nominal
+                   
+  
                   up      = histo_up.GetBinContent(ibin+1)
                   down    = histo_down.GetBinContent(ibin+1)
                   
                   # calculate maximum relative variation
                   #  - if for any reason I have negative entries, that nuisance is kept!
                   if nominal > 0 :
-                    if max_var_up < abs((nominal - up)/math.sqrt(nominal)) : 
-                      max_var_up = abs((nominal - up)/math.sqrt(nominal))
-                    if max_var_down < abs((nominal - down)/math.sqrt(nominal)) : 
-                      max_var_down = abs((nominal - down)/math.sqrt(nominal))
+                    if max_var_up < abs((nominal - up)/uncertainty_nominal) : 
+                      max_var_up = abs((nominal - up)/uncertainty_nominal)
+                    if max_var_down < abs((nominal - down)/uncertainty_nominal) : 
+                      max_var_down = abs((nominal - down)/uncertainty_nominal)
                 
                 # save the value
                 nuisance_to_be_removed_samples[sample] = (max_var_down, max_var_up)
@@ -274,7 +313,7 @@ if __name__ == '__main__':
     parser.add_option("-d", "--datacard",           dest="datacardInput",          help="datacard name", metavar="DATACARD")
     parser.add_option("-o", "--outdatacard",        dest="datacardOutput",         help="datacard name output", metavar="DATACARD")
     parser.add_option("-i", "--inputConfiguration", dest="nameFileConfiguration",  help="name configuration file with nuisances to remove", default='blabla.py')
-    parser.add_option("-t", "--threshold",          dest="threshold",              help="threshold", default=0.10,  type='float')
+    parser.add_option("-t", "--threshold",          dest="threshold",              help="threshold", default=0.15,  type='float')
 
     (options, args) = parser.parse_args()
 
