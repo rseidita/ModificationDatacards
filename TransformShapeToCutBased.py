@@ -211,7 +211,8 @@ def TransformShapeToCutBased (datacardname) :
 
 
             # calculate nuisance
-            tempsystematics[itSampleSyst] = str( round ( ( (1.00 - (integralNominal-integralDown) / integralNominal ) * tempScale ) , 3 ))   + "/" + str(   round(  (1.00 + (integralUp - integralNominal) / integralNominal ) * tempScale ,  3) )
+            #tempsystematics[itSampleSyst] = str( round ( ( (1.00 - (integralNominal-integralDown) / integralNominal ) * tempScale ) , 3 ))   + "/" + str(   round(  (1.00 + (integralUp - integralNominal) / integralNominal ) * tempScale ,  3) )
+            tempsystematics[itSampleSyst] = str( round ( ( (1.00 / ((integralNominal-integralDown) / integralNominal) ) * tempScale ) , 3 ))   + "/" + str(   round(  (1.00 + (integralUp - integralNominal) / integralNominal ) * tempScale ,  3) )
             print " now:: ",tempsystematics[0],"  :: ",nameSamepleWithThisNuisance," = ",tempsystematics[itSampleSyst]
 
 
