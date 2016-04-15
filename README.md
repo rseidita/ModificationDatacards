@@ -28,6 +28,11 @@ Create a copy of the datacard, do not touch the root file.
         -o datacard.test.txt  \
         -i examples/input_nuisances_to_prune.py    
     
+    python PruneDatacard.py  \
+        -d /afs/cern.ch/user/a/amassiro/Framework/CMSSW_7_6_3/src/PlotsConfigurations/Configurations/ggHTest/datacards/hww2l2v_13TeV_me_1j/mllVSmth/datacard.txt  \
+        -o datacard.test.txt  \
+        -i examples/input_nuisances_to_prune.py    
+    
     
     
     
