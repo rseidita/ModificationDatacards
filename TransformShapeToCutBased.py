@@ -213,7 +213,7 @@ def TransformShapeToCutBased (datacardname) :
             # calculate nuisance
             #tempsystematics[itSampleSyst] = str( round ( ( (1.00 - (integralNominal-integralDown) / integralNominal ) * tempScale ) , 3 ))   + "/" + str(   round(  (1.00 + (integralUp - integralNominal) / integralNominal ) * tempScale ,  3) )
             if (integralNominal-integralDown) != 0 :
-              tempsystematics[itSampleSyst] = str( round ( ( (1.00 / ((integralNominal-integralDown) / integralNominal) ) * tempScale ) , 3 ))   + "/" + str(   round(  (1.00 + (integralUp - integralNominal) / integralNominal ) * tempScale ,  3) )
+              tempsystematics[itSampleSyst] = str( round ( ( (1.00 / (1.00 + (integralNominal-integralDown) / integralNominal) ) * tempScale ) , 3 ))   + "/" + str(   round(  (1.00 + (integralUp - integralNominal) / integralNominal ) * tempScale ,  3) )
             else :
               tempsystematics[itSampleSyst] = str( round ( ( (1.00 - (integralNominal-integralDown) / integralNominal ) * tempScale ) , 3 ))   + "/" + str(   round(  (1.00 + (integralUp - integralNominal) / integralNominal ) * tempScale ,  3) )
              
