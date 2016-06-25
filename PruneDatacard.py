@@ -66,7 +66,7 @@ def GetPoissError(numberEvents, down, up):
         
 # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration, threshold) :
+def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration, threshold, suppressNegative) :
 
     # open the datacard file
 
@@ -230,12 +230,18 @@ def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration, thresho
                   
                   # calculate maximum relative variation
                   #  - if for any reason I have negative entries, that nuisance is kept!
-                  if nominal > 0 :
+                  if nominal > 0:
                     if max_var_up < abs((nominal - up)/uncertainty_nominal) : 
                       max_var_up = abs((nominal - up)/uncertainty_nominal)
                     if max_var_down < abs((nominal - down)/uncertainty_nominal) : 
                       max_var_down = abs((nominal - down)/uncertainty_nominal)
-                
+                      
+                  if suppressNegative:
+                    # if put to 0, then always suppressed
+                    max_var_up = 0.
+                    max_var_down = 0.
+                 
+                 
                 # save the value
                 nuisance_to_be_removed_samples[sample] = (max_var_down, max_var_up)
                  
@@ -314,12 +320,14 @@ if __name__ == '__main__':
     parser.add_option("-o", "--outdatacard",        dest="datacardOutput",         help="datacard name output", metavar="DATACARD")
     parser.add_option("-i", "--inputConfiguration", dest="nameFileConfiguration",  help="name configuration file with nuisances to remove", default='blabla.py')
     parser.add_option("-t", "--threshold",          dest="threshold",              help="threshold", default=0.15,  type='float')
+    parser.add_option("-s", "--suppressNegative",   dest="suppressNegative",       help="suppress negative bin fluctuation", default=False )
 
     (options, args) = parser.parse_args()
 
-    PruneDatacard (options.datacardInput, options.datacardOutput, options.nameFileConfiguration,  options.threshold)
+    PruneDatacard (options.datacardInput, options.datacardOutput, options.nameFileConfiguration,  options.threshold,     options.suppressNegative)
     
     print "options.threshold = ", options.threshold
+    print "options.suppressNegative = ", options.suppressNegative
     
 
 
