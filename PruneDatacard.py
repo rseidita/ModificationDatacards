@@ -236,7 +236,7 @@ def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration, thresho
                     if max_var_down < abs((nominal - down)/uncertainty_nominal) : 
                       max_var_down = abs((nominal - down)/uncertainty_nominal)
                       
-                  if suppressNegative:
+                  elif suppressNegative:
                     # if put to 0, then always suppressed
                     max_var_up = 0.
                     max_var_down = 0.
