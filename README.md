@@ -33,7 +33,11 @@ Create a copy of the datacard, do not touch the root file.
         -o datacard.test.txt  \
         -i examples/input_nuisances_to_prune.py    
     
-    
+    python PruneDatacard.py  \
+         -d /afs/cern.ch/user/a/amassiro/Framework/CMSSW_8_0_5/src/PlotsConfigurations/Configurations/VBF/datacards/hww2l2v_13TeV_top_of2j_vbf/events/datacard.txt \
+         -o /afs/cern.ch/user/a/amassiro/Framework/CMSSW_8_0_5/src/PlotsConfigurations/Configurations/VBF/datacards/hww2l2v_13TeV_top_of2j_vbf/events/datacard.txt.pruned.txt \
+         --suppressNegative=True  --suppressFluctuationError=True -i examples/input_nuisances_to_prune_aggressive.py
+
     
     
 # Scale one sample by a factor

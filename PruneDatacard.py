@@ -66,7 +66,7 @@ def GetPoissError(numberEvents, down, up):
         
 # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration, threshold, suppressNegative) :
+def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration, threshold, suppressNegative, suppressFluctuationError) :
 
     # open the datacard file
 
@@ -187,6 +187,7 @@ def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration, thresho
       #print " histograms = ", histograms
 
       nuisance_to_be_removed = []
+      nuisance_to_be_removed_sample_dependent = {}
       for nuisance in systematicsName :
         for  hr_list_nuisances_to_test, nuisance_to_test in nuisancesToPrune.iteritems() :
           #print " hr_list_nuisances_to_test = ", hr_list_nuisances_to_test, " -> ", nuisance_to_test
@@ -210,8 +211,11 @@ def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration, thresho
                 histo_up   = histograms[nameTempUp] 
                 histo_down = histograms[nameTempDown] 
                 
-                max_var_up = 0
+                max_var_up   = 0
                 max_var_down = 0
+
+                max_var_fluctuation_suppression_error_up   = 1
+                max_var_fluctuation_suppression_error_down = 1
                 
                 for ibin in range( histo_nominal.GetNbinsX() ) :
                   nominal = histo_nominal.GetBinContent(ibin+1)
@@ -235,26 +239,54 @@ def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration, thresho
                       max_var_up = abs((nominal - up)/uncertainty_nominal)
                     if max_var_down < abs((nominal - down)/uncertainty_nominal) : 
                       max_var_down = abs((nominal - down)/uncertainty_nominal)
-                      
+
+                    #print " >>>>> nuisance:", nuisance, " ::> " , sample, " --> up = ", up,   " down = ", down                    
+                    # check if variation is moving to 0 or to negative
+                    if suppressFluctuationError :
+                       if up <= 0 or down <=0 :
+                         max_var_fluctuation_suppression_error_up = 0
+                         max_var_fluctuation_suppression_error_down = 0
+                         print " >>>>> nuisance:", nuisance, " ::> " , sample, " --> up = ", up,   " down = ", down
+                     
                   elif suppressNegative:
                     # if put to 0, then always suppressed
                     max_var_up = 0.
                     max_var_down = 0.
                  
-                 
+
                 # save the value
-                nuisance_to_be_removed_samples[sample] = (max_var_down, max_var_up)
+                nuisance_to_be_removed_samples[sample] = (max_var_up, max_var_down)
+
+                # check to remove nuisances sample dependent
+                if max_var_fluctuation_suppression_error_up < 1 or max_var_fluctuation_suppression_error_down < 1 :
+                  if nuisance not in nuisance_to_be_removed_sample_dependent.keys():
+                    nuisance_to_be_removed_sample_dependent[nuisance] = [sample]
+                  else :
+                    nuisance_to_be_removed_sample_dependent[nuisance].append(sample)
+            
+                  
                  
             max_variation = 0     
             for sampleNameToCheck, values in nuisance_to_be_removed_samples.iteritems() :
               if max_variation < values[0] or  max_variation < values[1] :
                 max_variation = max(values[0], values[1])
             
+            
             # default value of threshold is 0.10
             if max_variation < threshold :
               nuisance_to_be_removed.append(nuisance)
               print " To be removed: ", nuisance, " --> ", max_variation
              
+ 
+            ## check to remove nuisances sample dependent
+            #for sampleNameToCheck, values in nuisance_to_be_removed_samples.iteritems() :
+              #if values[0] < 1 or values[1] < 1 :
+                #if nuisance not in nuisance_to_be_removed_sample_dependent.keys():
+                  #nuisance_to_be_removed_sample_dependent[nuisance] = [sampleNameToCheck]
+                #else :
+                  #nuisance_to_be_removed_sample_dependent[nuisance].append(sampleNameToCheck)
+            
+            
  
 
     # write new datacard
@@ -303,7 +335,26 @@ def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration, thresho
     numSyst = 0
     for nuisance in systematicsName :
       if nuisance not in nuisance_to_be_removed :
-        f.write (systematics[numSyst] + '\n')
+        
+        if nuisance not in nuisance_to_be_removed_sample_dependent.keys() :
+          f.write (systematics[numSyst] + '\n')
+        else :
+          # suppress only for some samples!
+          details_systematics = systematics[numSyst].split ()
+          print " nuisance_to_be_removed_sample_dependent[", nuisance, "] = ", nuisance_to_be_removed_sample_dependent[nuisance]
+          for index in range(len(details_systematics)) :
+            if index < 2 :
+              f.write (details_systematics[index] + '   ')
+            else :
+              #print " --> ", details_systematics[index]
+              #print " sampleName[", index-2, " : ", len(details_systematics) , " :: ", len(sampleName), "] = ", 
+              #print "   ",  sampleName[index-2]
+              if sampleName[index-2] in nuisance_to_be_removed_sample_dependent[nuisance] :
+                f.write ( '    -     ')
+                print " removed: ", sampleName[index-2], " :: ", nuisance
+              else :
+                f.write ( details_systematics[index] + '  ')            
+          f.write ('     \n')
       numSyst+=1
 
 
@@ -316,15 +367,16 @@ def PruneDatacard (datacardname, datacardnameOut, nameFileConfiguration, thresho
 if __name__ == '__main__':
 
     parser = OptionParser()
-    parser.add_option("-d", "--datacard",           dest="datacardInput",          help="datacard name", metavar="DATACARD")
-    parser.add_option("-o", "--outdatacard",        dest="datacardOutput",         help="datacard name output", metavar="DATACARD")
-    parser.add_option("-i", "--inputConfiguration", dest="nameFileConfiguration",  help="name configuration file with nuisances to remove", default='blabla.py')
-    parser.add_option("-t", "--threshold",          dest="threshold",              help="threshold", default=0.15,  type='float')
-    parser.add_option("-s", "--suppressNegative",   dest="suppressNegative",       help="suppress negative bin fluctuation", default=False )
+    parser.add_option("-d", "--datacard",                   dest="datacardInput",                help="datacard name", metavar="DATACARD")
+    parser.add_option("-o", "--outdatacard",                dest="datacardOutput",               help="datacard name output", metavar="DATACARD")
+    parser.add_option("-i", "--inputConfiguration",         dest="nameFileConfiguration",        help="name configuration file with nuisances to remove", default='blabla.py')
+    parser.add_option("-t", "--threshold",                  dest="threshold",                    help="threshold", default=0.15,  type='float')
+    parser.add_option("-s", "--suppressNegative",           dest="suppressNegative",             help="suppress negative bin fluctuation", default=False )
+    parser.add_option(      "--suppressFluctuationError",   dest="suppressFluctuationError",     help="suppress negative/zero bin fluctuation that causes combine error", default=False )
 
     (options, args) = parser.parse_args()
 
-    PruneDatacard (options.datacardInput, options.datacardOutput, options.nameFileConfiguration,  options.threshold,     options.suppressNegative)
+    PruneDatacard (options.datacardInput, options.datacardOutput, options.nameFileConfiguration,  options.threshold,     options.suppressNegative,     options.suppressFluctuationError)
     
     print "options.threshold = ", options.threshold
     print "options.suppressNegative = ", options.suppressNegative
