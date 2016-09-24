@@ -3,3 +3,4 @@
 #
 
 nameFactor.update({'VVV'  : ''})
+nameFactor.update({'Vg'   : ''})
