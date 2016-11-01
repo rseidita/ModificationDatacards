@@ -15,15 +15,15 @@
 ls /afs/cern.ch/user/a/amassiro/Framework/CMSSW_8_0_5/src/PlotsConfigurations/Configurations/ggH/datacards/*/*/*.txt  | grep -v "pruned"  |   \
     awk '{print "python PruneDatacard.py  -d "$1" -o "$1".pruned.txt  --suppressNegative=True    -i examples/input_nuisances_to_prune.py"}' | /bin/sh
 
-# ls /afs/cern.ch/user/a/amassiro/Framework/CMSSW_8_0_5/src/PlotsConfigurations/Configurations/ggH/Moriond/datacards/*/*/*.txt  | grep -v "pruned"  |   \
-#     awk '{print "python PruneDatacard.py  -d "$1" -o "$1".pruned.txt  --suppressNegative=True    -i examples/input_nuisances_to_prune.py"}' | /bin/sh
+ls /afs/cern.ch/user/a/amassiro/Framework/CMSSW_8_0_5/src/PlotsConfigurations/Configurations/ggH/Moriond/datacards/*/*/*.txt  | grep -v "pruned"  |   \
+    awk '{print "python PruneDatacard.py  -d "$1" -o "$1".pruned.txt  --suppressNegative=True    -i examples/input_nuisances_to_prune.py"}' | /bin/sh
 
     
-# ls /afs/cern.ch/user/a/amassiro/Framework/CMSSW_8_0_5/src/PlotsConfigurations/Configurations/ggH2j/datacards/*/*/*.txt  | grep -v "pruned"  |   \
-#     awk '{print "python PruneDatacard.py  -d "$1" -o "$1".pruned.txt  --suppressNegative=True    -i examples/input_nuisances_to_prune.py"}' | /bin/sh
-# 
-# 
-# ls /afs/cern.ch/user/a/amassiro/Framework/CMSSW_8_0_5/src/PlotsConfigurations/Configurations/ggH2j/Moriond/datacards/*/*/*.txt  | grep -v "pruned"  |   \
-#     awk '{print "python PruneDatacard.py  -d "$1" -o "$1".pruned.txt  --suppressNegative=True    -i examples/input_nuisances_to_prune.py"}' | /bin/sh
-# 
+ls /afs/cern.ch/user/a/amassiro/Framework/CMSSW_8_0_5/src/PlotsConfigurations/Configurations/ggH2j/datacards/*/*/*.txt  | grep -v "pruned"  |   \
+    awk '{print "python PruneDatacard.py  -d "$1" -o "$1".pruned.txt  --suppressNegative=True    -i examples/input_nuisances_to_prune.py"}' | /bin/sh
+
+
+ls /afs/cern.ch/user/a/amassiro/Framework/CMSSW_8_0_5/src/PlotsConfigurations/Configurations/ggH2j/Moriond/datacards/*/*/*.txt  | grep -v "pruned"  |   \
+    awk '{print "python PruneDatacard.py  -d "$1" -o "$1".pruned.txt  --suppressNegative=True    -i examples/input_nuisances_to_prune.py"}' | /bin/sh
+
 
