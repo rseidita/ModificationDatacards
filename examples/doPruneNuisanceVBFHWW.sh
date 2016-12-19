@@ -8,9 +8,18 @@ eval `scramv1 runtime -sh`
 cd -
 
 
-ls /afs/cern.ch/user/a/amassiro/Framework/CMSSW_8_0_5/src/PlotsConfigurations/Configurations/VBF/datacards/*/*/*.txt  | grep -v "pruned"  |   \
-    awk '{print "python PruneDatacard.py  -d "$1" -o "$1".pruned.txt --suppressNegative=True  --suppressFluctuationError=True -i examples/input_nuisances_to_prune_aggressive.py"}'   | /bin/sh
+# ls /afs/cern.ch/user/a/amassiro/Framework/CMSSW_8_0_5/src/PlotsConfigurations/Configurations/VBF/datacards/*/*/*.txt  | grep -v "pruned"  |   \
+#     awk '{print "python PruneDatacard.py  -d "$1" -o "$1".pruned.txt --suppressNegative=True  --suppressFluctuationError=True -i examples/input_nuisances_to_prune_aggressive.py"}'   | /bin/sh
 
+
+# ls /afs/cern.ch/user/a/amassiro/Framework/CMSSW_8_0_5/src/PlotsConfigurations/Configurations/VBF/datacards/*/*/*.txt  | grep -v "pruned"  |   \
+#     awk '{print "python PruneDatacard.py  -d "$1" -o "$1".pruned.txt --suppressNegative=True  --suppressFluctuationError=True -i examples/input_nuisances_to_prune.py"}'   | /bin/sh
+
+ls /afs/cern.ch/user/a/amassiro/Framework/CMSSW_8_0_5/src/PlotsConfigurations/Configurations/VBF/datacards/*/*/*.txt  | grep -v "pruned"  |   \
+    awk '{print "python PruneDatacard.py  -d "$1" -o "$1".pruned.txt --suppressNegative=True  --suppressFluctuationError=True -i examples/input_nuisances_to_prune_VBF.py"}'   | /bin/sh
+    
+    
+    
 
 # clean samples
 ls /afs/cern.ch/user/a/amassiro/Framework/CMSSW_8_0_5/src/PlotsConfigurations/Configurations/VBF/datacards/*_top_*/*/*.txt  | grep "pruned" | grep -v "filtered" |   \
@@ -18,11 +27,11 @@ ls /afs/cern.ch/user/a/amassiro/Framework/CMSSW_8_0_5/src/PlotsConfigurations/Co
 
 
 ls /afs/cern.ch/user/a/amassiro/Framework/CMSSW_8_0_5/src/PlotsConfigurations/Configurations/VBF/datacards/*_dytt_*/*/*.txt  | grep "pruned" | grep -v "filtered" |   \
-    awk '{print "python RemoveSample.py   "$1" -o "$1".filtered.txt    -i examples/inputRemoveNameVBF.py"}'   | /bin/sh
+    awk '{print "python RemoveSample.py   "$1" -o "$1".filtered.txt    -i examples/inputRemoveNameVBFDYtt.py"}'   | /bin/sh
 
-        
     
-
+    
+    
     
     
     
