@@ -11,6 +11,7 @@ from math import sqrt,fabs
 parser = OptionParser()
 parser.add_option("-i", "--input",  dest="nameFileChange", help="file with samples to remove (e.g. ttH)", default='blabla.py')
 parser.add_option("-o", "--output", dest="nameOutFileDC",  help="file where to dump the new DC", default='test.txt')
+parser.add_option("-k", "--keep",   dest="SignalToKeep",   help="Signal sample in inputFile you want to keep", default='monoH_600_300')
 
 (options, args) = parser.parse_args()
 options.bin = True # fake that is a binary output, so that we parse shape lines
@@ -36,9 +37,6 @@ nuisToConsider = [ y for y in DC.systs ]
 #print " DC.systs = ", DC.systs
 #print " DC.rateParamsOrder = ", DC.rateParamsOrder
 #print " DC.rateParams      = ", DC.rateParams
-
-
-
 
 
 # copy header
@@ -69,6 +67,7 @@ print "#####################################"
 
 # write new datacard
 filename = options.nameOutFileDC
+signalName = options.SignalToKeep 
 f = open(filename, 'w')
 
 # header
@@ -79,7 +78,7 @@ f.write ("bin                                 ")
 for channel in DC.exp:
     for process in DC.exp[channel]:
         #print nameFactor.keys() --> ['WJet', 'ttH', 'qqH', 'VV']
-        if (process not in nameFactor.keys()) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
+        if (process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
             f.write ("%13s " % channel)
 f.write("\n")
 
@@ -89,7 +88,7 @@ for channel, samples  in DC.exp.items():
     #print samples
     for process,rate in samples.items():
     #for process in DC.exp[channel]:
-        if (process not in nameFactor.keys()) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
+        if (process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
             f.write ("%13s " % process)
             #print "process = ",process
 
@@ -101,7 +100,7 @@ for channel, samples  in DC.exp.items():
     numSig = 0
     numBkg = 1
     for process,rate in samples.items():
-        if (process not in nameFactor.keys()) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
+        if (process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
             if DC.isSignal[process] :
                 f.write ("%13d " % numSig)
                 numSig = numSig - 1
@@ -114,7 +113,7 @@ f.write("\n")
 f.write ("rate ")
 for channel, samples  in DC.exp.items():
     for process,rate in samples.items():
-        if (process not in nameFactor.keys()) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
+        if (process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
             f.write ("%9.4f " % DC.exp[channel][process] )
 f.write("\n")
 
@@ -140,7 +139,7 @@ for nuis in nuisToConsider:
       
       for channel, samples  in DC.exp.items():
           for process,rate in samples.items(): 
-              if (process not in nameFactor.keys()) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
+              if (process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
                   if channel in nuis[4]:
                       if process in nuis[4][channel] :
                           if not isinstance ( nuis[4][channel][process], float ) :
