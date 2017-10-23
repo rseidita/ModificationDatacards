@@ -79,6 +79,7 @@ for channel in DC.exp:
     for process in DC.exp[channel]:
         #print nameFactor.keys() --> ['WJet', 'ttH', 'qqH', 'VV']
         if (process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
+            print process
             f.write ("%13s " % channel)
 f.write("\n")
 
@@ -139,6 +140,7 @@ for nuis in nuisToConsider:
       
       for channel, samples  in DC.exp.items():
           for process,rate in samples.items(): 
+
               if (process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
                   if channel in nuis[4]:
                       if process in nuis[4][channel] :
