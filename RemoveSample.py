@@ -187,6 +187,30 @@ for rateParNameCutAndSample in DC.rateParams:
 
 #DC.rateParamsOrder
     
+# map of which bins should have automated Barlow-Beeston parameters
+#
+#     statFlags = (statThreshold, statIncludeSig, statHistMode)
+#
+# * autoMCStats ' + nuisance ['maxPoiss'] + '  ' + nuisance ['includeSignal']
+#
+#
+
+#
+# looping ove rthe bins, but actually we just use "*" 
+# to apply this to all channels
+#  --> repetitat iuvant
+for autoMCbins in DC.binParFlags:
+
+  print " autoMCbins = ", autoMCbins
+
+  f.write ("*   ")
+  f.write ("   autoMCStats   " )
+  f.write ("  %s   " % DC.binParFlags[autoMCbins][0])
+  f.write ("  %s   " % DC.binParFlags[autoMCbins][1])
+  f.write("\n")
+
+
+    
     
     
 f.close ()

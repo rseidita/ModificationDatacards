@@ -14,6 +14,17 @@ Kate:
 
     lxplus-Combine
     
+
+# Setup combine
+
+See: https://cms-hcomb.gitbooks.io/combine/content/part1/#for-end-users-that-dont-need-to-commit-or-do-any-development
+
+
+    cd ~/Framework/Combine/CMSSW_8_1_0/src/    
+    eval `scramv1 runtime -sh`
+    cd -
+
+    
     
 # Prune nuisances
 
