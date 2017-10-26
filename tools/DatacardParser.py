@@ -14,6 +14,7 @@ def addDatacardParserOptions(parser):
     parser.add_option("-m", "--mass",     dest="mass",     default=0,  type="float",  help="Higgs mass to use. Will also be written in the Workspace as RooRealVar 'MH'.")
     parser.add_option("-D", "--dataset",  dest="dataname", default="data_obs",  type="string",  help="Name of the observed dataset")
     parser.add_option("-L", "--LoadLibrary", dest="libs",  type="string" , action="append", help="Load these libraries")
+    parser.add_option("--keyword-value",     dest="modelparams",  default = [], nargs=1, type='string', action='append',  help="Set keyword values with 'WORD=VALUE', will replace $WORD with VALUE in datacards. Filename will also be extended with 'WORDVALUE' ")
     parser.add_option("--poisson",  dest="poisson",  default=0,  type="int",    help="If set to a positive number, binned datasets wih more than this number of entries will be generated using poissonians")
     parser.add_option("--default-morphing",  dest="defMorph", type="string", default="shape2N", help="Default template morphing algorithm (to be used when the datacard has just 'shape')")
     parser.add_option("--no-b-only","--for-fits",    dest="noBOnly", default=False, action="store_true", help="Do not save the background-only pdf (saves time)")
@@ -74,6 +75,8 @@ def parseCard(file, options):
     if type(file) == type("str"):
         raise RuntimeError, "You should pass as argument to parseCards a file object, stream or a list of lines, not a string"
     ret = Datacard()
+
+    # resetting these here to defaults, parseCard will fill them up
     ret.discretes=[]
     ret.groups={}
  
@@ -119,9 +122,7 @@ def parseCard(file, options):
                 binline = []
                 for b in f[1:]:
                     if re.match("[0-9]+", b):
-                        if shapesUseBin: stderr.write("Warning: Bin %(b)s starts with a digit. Will call it 'bin%(b)s' but this may break shapes.\n" % locals())
-                        b = "bin"+b
-                        # TODO Here should be some patching of the shapes names in order to not get errors later.
+                        raise RuntimeError, "Error: Bin %(b)s starts with a digit!" % locals()
                     binline.append(b)
             if f[0] == "process": 
                 if processline == []: # first line contains names
@@ -256,6 +257,20 @@ def parseCard(file, options):
                     else:
                         raise RuntimeError, "Will not redefine group '%s'. It previously contained '%s' and you now wanted it to contain '%s'." % (groupName,ret.groups[groupName],groupNuisances)                        
 
+                continue
+            elif pdf=="autoMCStats":
+                if len(f)>5: raise RuntimeError, "Syntax for autoMCStats should be 'channel autoMCStats threshold [include-signal = 0] [hist-mode = 0]"
+                statThreshold = float(f[2])
+                statIncludeSig = bool(int(f[3])) if len(f) >= 4 else False
+                statHistMode = int(f[4]) if len(f) >= 5 else 1
+                statFlags = (statThreshold, statIncludeSig, statHistMode)
+                if "*" in lsyst: 
+                  for b in ret.bins: 
+                        if (not fnmatch.fnmatch(b, lsyst)): continue
+                        ret.binParFlags[b]=statFlags
+                else:
+                  if lsyst not in ret.bins: raise RuntimeError, " No such channel '%s', malformed line:\n   %s" % (lsyst,' '.join(f))
+                  ret.binParFlags[lsyst]=statFlags
                 continue
             else:
                 raise RuntimeError, "Unsupported pdf %s" % pdf
