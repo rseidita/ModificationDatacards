@@ -12,13 +12,14 @@ parser = OptionParser()
 parser.add_option("-i", "--input",  dest="nameFileChange", help="file with samples to remove (e.g. ttH)", default='blabla.py')
 parser.add_option("-o", "--output", dest="nameOutFileDC",  help="file where to dump the new DC", default='test.txt')
 parser.add_option("-k", "--keep",   dest="SignalToKeep",   help="Signal sample in inputFile you want to keep", default='monoH_600_300')
+parser.add_option("-t", "--threshold",   dest="threshold",   help="Remove samples if expected yield < threshold", default='9999999999.')
 
 (options, args) = parser.parse_args()
 options.bin = True # fake that is a binary output, so that we parse shape lines
 options.noJMax = False
 options.nuisancesToExclude = ''
 options.stat = False
-
+threshold = float(options.threshold)
 
 nameFactor = {}
 if os.path.exists(options.nameFileChange):
@@ -27,9 +28,10 @@ if os.path.exists(options.nameFileChange):
     handle.close()
 print "nameFactor = ", nameFactor
 
-import sys
-sys.path.append('tools')
-from DatacardParser import *
+#import sys
+#sys.path.append(os.path.dirname(os.path.realpath(__file__))+'/tools')
+#from DatacardParser import *
+from HiggsAnalysis.CombinedLimit.DatacardParser import *
 
 DC = parseCard(file(args[0]), options)
 nuisToConsider = [ y for y in DC.systs ]
@@ -73,14 +75,18 @@ f = open(filename, 'w')
 # header
 for line in header: f.write (line + '\n')
 f.write ("---------------------------------------------------------------------------------------------------- \n")
-# bin name
+
 f.write ("bin                                 ")
-for channel in DC.exp:
-    for process in DC.exp[channel]:
-        #print nameFactor.keys() --> ['WJet', 'ttH', 'qqH', 'VV']
-        if (process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
-            print process
-            f.write ("%13s " % channel)
+for channel, samples  in DC.exp.items():
+    for process,rate in samples.items():
+        if ( ((process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel))) and ( not ('ALL' in nameFactor.keys())) ) :
+                print "Keep", channel,"/",process, "(yield =", rate,")"
+                f.write ("%13s " % channel)
+        elif rate >= threshold:
+                print "Keep", channel,"/",process, "(yield =", rate,")"
+                f.write ("%13s " % channel)
+        else:
+                print "Remove", channel,"/",process, "(yield =", rate,") --> Below threshold (",threshold,")"
 f.write("\n")
 
 # process names (a.k.a. process)
@@ -89,9 +95,9 @@ for channel, samples  in DC.exp.items():
     #print samples
     for process,rate in samples.items():
     #for process in DC.exp[channel]:
-        if (process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
+        if ((process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel))) and ( not ('ALL' in nameFactor.keys())) :
             f.write ("%13s " % process)
-            #print "process = ",process
+        elif rate >= threshold:                f.write ("%13s " % process)
 
 f.write("\n")
 
@@ -101,21 +107,32 @@ for channel, samples  in DC.exp.items():
     numSig = 0
     numBkg = 1
     for process,rate in samples.items():
-        if (process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
+        if ( ((process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel))) and ( not ('ALL' in nameFactor.keys())) ) :
             if DC.isSignal[process] :
                 f.write ("%13d " % numSig)
                 numSig = numSig - 1
             else :
                 f.write ("%13d " % numBkg)
                 numBkg = numBkg + 1
+        elif rate >= threshold:
+            if DC.isSignal[process] :
+                f.write ("%13d " % numSig)
+                numSig = numSig - 1
+            else :
+                f.write ("%13d " % numBkg)
+                numBkg = numBkg + 1
+
 f.write("\n")
 
 # rate
 f.write ("rate ")
 for channel, samples  in DC.exp.items():
     for process,rate in samples.items():
-        if (process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
+        if ( ((process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel))) and ( not ('ALL' in nameFactor.keys())) ) :
             f.write ("%9.4f " % DC.exp[channel][process] )
+        elif rate >= threshold:
+            f.write ("%9.4f " % DC.exp[channel][process] )
+
 f.write("\n")
 
 f.write ("---------------------------------------------------------------------------------------------------- \n")
@@ -140,8 +157,7 @@ for nuis in nuisToConsider:
       
       for channel, samples  in DC.exp.items():
           for process,rate in samples.items(): 
-
-              if (process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel)) :
+              if ( ((process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel))) and ( not ('ALL' in nameFactor.keys())) ) :
                   if channel in nuis[4]:
                       if process in nuis[4][channel] :
                           if not isinstance ( nuis[4][channel][process], float ) :
@@ -156,6 +172,22 @@ for nuis in nuisToConsider:
                           f.write ("%13s" % "-")
                   else :
                       f.write ("%13s" % "-")
+              elif rate >= threshold :
+                  if channel in nuis[4]:
+                      if process in nuis[4][channel] :
+                          if not isinstance ( nuis[4][channel][process], float ) :
+                          # [0.95, 1.23]  ---> from 0.95/1.23
+                              f.write ("   {0:4.3f}/{1:4.3f}".format(nuis[4][channel][process][0], nuis[4][channel][process][1]))
+                          else :
+                              if (nuis[4][channel][process] != 0) :
+                                  f.write ("%9.4f" % nuis[4][channel][process])
+                              else :
+                                  f.write ("%13s" % "-")
+                      else :
+                          f.write ("%13s" % "-")
+                  else :
+                      f.write ("%13s" % "-")
+
     f.write("\n")
 
 #
@@ -206,7 +238,7 @@ for autoMCbins in DC.binParFlags:
   f.write ("*   ")
   f.write ("   autoMCStats   " )
   f.write ("  %s   " % DC.binParFlags[autoMCbins][0])
-  f.write ("  %s   " % DC.binParFlags[autoMCbins][1])
+  f.write ("  %s   " % int(DC.binParFlags[autoMCbins][1]))
   f.write("\n")
 
 

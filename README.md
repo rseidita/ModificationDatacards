@@ -24,6 +24,16 @@ See: https://cms-hcomb.gitbooks.io/combine/content/part1/#for-end-users-that-don
     eval `scramv1 runtime -sh`
     cd -
 
+# Remove samples with expected yield below a given threshold
+
+Check the yield of given samples in some or all categories, and remove the sample if the yield is below some threshold (default threshold = 9999999...)
+
+    python RemoveSample.py datacard.txt -o outdatacard.txt -i inputRemoveName.py --threshold 0.01
+
+In order to check all samples in the datacard use the 'ALL' tag in the input file, i.e.:
+
+    python RemoveSample.py datacard.txt -o outdatacard.txt -i inputRemoveAllSamplesBelowThreshold.py --threshold 0.01
+
     
     
 # Prune nuisances
