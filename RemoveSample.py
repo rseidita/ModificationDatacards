@@ -73,20 +73,27 @@ signalName = options.SignalToKeep
 f = open(filename, 'w')
 
 # header
-for line in header: f.write (line + '\n')
+for line in header: 
+  if 'jmax' in line: f.write(line.replace(line.split()[1],'RPLME_JMAX') + '\n')
+  else: f.write (line + '\n')
 f.write ("---------------------------------------------------------------------------------------------------- \n")
 
 f.write ("bin                                 ")
+procstokeep = []
 for channel, samples  in DC.exp.items():
+    jmax_cat = 0
     for process,rate in samples.items():
         if ( ((process not in nameFactor.keys()) or (process in nameFactor.keys() and process == signalName) or (process in nameFactor.keys() and (nameFactor[ process ] != "" and nameFactor[ process ] != channel))) and ( not ('ALL' in nameFactor.keys())) ) :
                 print "Keep", channel,"/",process, "(yield =", rate,")"
                 f.write ("%13s " % channel)
+                if process not in procstokeep: procstokeep.append(process)
         elif rate >= threshold:
                 print "Keep", channel,"/",process, "(yield =", rate,")"
                 f.write ("%13s " % channel)
+                if process not in procstokeep: procstokeep.append(process)
         else:
                 print "Remove", channel,"/",process, "(yield =", rate,") --> Below threshold (",threshold,")"
+
 f.write("\n")
 
 # process names (a.k.a. process)
@@ -242,11 +249,13 @@ for autoMCbins in DC.binParFlags:
   f.write("\n")
 
 
-    
-    
-    
 f.close ()
 
+#re-open the file to fix jmax in the header
+with open (filename, 'r') as f:
+  text = f.read()
+f.close()
 
-
-
+with open (filename, 'w') as f:
+  f.write(text.replace('RPLME_JMAX',str(len(procstokeep)-1)))
+f.close()
