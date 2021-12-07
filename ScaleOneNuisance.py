@@ -159,6 +159,10 @@ def ScaleOneNuisance (datacardname,systScale) :
       # modify the histograms
       outFile = ROOT.TFile.Open(str(thepath)+"/"+str(rootFiles[rootFileBin]+".new.root"),'recreate')
 
+      ### Modded to allow scaling different samples by different amounts
+      doSeparateSamples = False
+      if isinstance(systScaleFactor[systematicsName[numSystType]], list): doSeparateSamples = True
+
       for histoName, histogram in histograms.iteritems():
 
         # modify nuisance systScaleFactor (check samples that are affected)
@@ -169,6 +173,8 @@ def ScaleOneNuisance (datacardname,systScale) :
               # change root file histogram
               # look for which samples are affected
               for sample in reducedsampleName:
+                if doSeparateSamples:
+                  if not sample in systScaleFactor[systematicsName[numSystType]]: continue
                 #print "histoName = ",histoName
                 matchUp = bool("histo_"+str(sample)+"_"+systematicsName[numSystType]+"Up"   == histoName)
                 matchDo = bool("histo_"+str(sample)+"_"+systematicsName[numSystType]+"Down" == histoName)
@@ -177,7 +183,7 @@ def ScaleOneNuisance (datacardname,systScale) :
 
                 if matchUp or matchDo:
                   print ">> scaling ", systematicsName[numSystType]
-                  additionalScale = float(systScaleFactor[systematicsName[numSystType]])
+                  additionalScale = float(systScaleFactor[systematicsName[numSystType]]['sample']) if doSeparateSamples else float(systScaleFactor[systematicsName[numSystType]])
                   # what to do now?
                   # 1) get the nominal
                   nominalHist = histograms["histo_"+str(sample)]
