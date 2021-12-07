@@ -28,7 +28,7 @@ import math
 
 # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-def ScaleOneNuisance (datacardname,systScale) :
+def ScaleOneNuisance (datacardname,systScale,samplesToScale) :
 
     # open the datacard file
 
@@ -135,6 +135,10 @@ def ScaleOneNuisance (datacardname,systScale) :
     # NB: the order is not preserved, but who cares!
     reducedsampleName = list(set(sampleName))
 
+    _samplesToScale = []
+
+    if samplesToScale != 'all': _samplesToScale = [s of s in samplesToScal.split(',')]
+
     # modify sample rate in root file!
 
     for rootFileBin in rootFiles:
@@ -169,6 +173,7 @@ def ScaleOneNuisance (datacardname,systScale) :
               # change root file histogram
               # look for which samples are affected
               for sample in reducedsampleName:
+                if _samplesToScale and not sample in _samplesToScale: continue
                 #print "histoName = ",histoName
                 matchUp = bool("histo_"+str(sample)+"_"+systematicsName[numSystType]+"Up"   == histoName)
                 matchDo = bool("histo_"+str(sample)+"_"+systematicsName[numSystType]+"Down" == histoName)
@@ -300,9 +305,10 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-d", "--datacard", dest="datacardInput", help="datacard name", metavar="DATACARD")
     parser.add_option("-i", "--input", dest="systScale", help="systematic scaling (e.g. Wjets scaled by a factor 1.5)", default='blabla.py')
+    parser.add_option("-s", "--samples", dest="samplesToScale", help="comma separated list of samples to scale, defaults to scaling all samples", default="all")
  
     (options, args) = parser.parse_args()
 
-    ScaleOneNuisance (options.datacardInput,options.systScale)
+    ScaleOneNuisance (options.datacardInput,options.systScale,options.samplesToScale)
 
 
